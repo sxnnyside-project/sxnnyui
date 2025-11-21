@@ -2,15 +2,21 @@
 //  Date.swift
 //  SxnnyUI
 //
-//  Created by TI on 23/05/25.
+//  Created by Sxnnyside Project on 23/05/25.
 //
 
 import Foundation
 
+// MARK: - Date Utilities
+
 public extension Date {
-    // MARK: - Static DateFormatter
+
+    // MARK: Cached Formatter
 
     /// A cached formatter for the default format to improve performance.
+    ///
+    /// Uses the format `"yyyy-MM-dd HH:mm:ss"` with the `en_US_POSIX` locale, which is a stable,
+    /// non-user-facing locale appropriate for fixed-format parsing and formatting.
     private static let defaultFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
@@ -18,12 +24,17 @@ public extension Date {
         return formatter
     }()
 
-    // MARK: - Formatting
+    // MARK: Formatting
 
-    /// Returns the date formatted as a string using the provided format.
+    /// Returns the date formatted as a string using the provided format string.
+    ///
+    /// - Important: This uses the `en_US_POSIX` locale to ensure a predictable, fixed-format output,
+    ///   which is recommended for non-localized formatting. If you require localized output, use
+    ///   `DateFormatter` with appropriate `dateStyle`/`timeStyle` and `locale`.
     ///
     /// - Parameter format: A custom date format string. Defaults to `"yyyy-MM-dd HH:mm:ss"`.
     /// - Returns: A formatted date string.
+    @inlinable
     func formatted(_ format: String = "yyyy-MM-dd HH:mm:ss") -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = format
@@ -32,45 +43,58 @@ public extension Date {
     }
 
     /// Returns the date formatted using the default cached formatter (`"yyyy-MM-dd HH:mm:ss"`).
+    ///
+    /// Uses the `en_US_POSIX` locale for a predictable, fixed-format output.
+    @inlinable
     func formattedWithDefault() -> String {
-        return Self.defaultFormatter.string(from: self)
+        Self.defaultFormatter.string(from: self)
     }
 
-    // MARK: - Date Comparisons
+    // MARK: Calendar Checks
 
-    /// Returns `true` if the date is today.
+    /// A Boolean value indicating whether the date is today, using the current calendar.
+    @inlinable
     var isToday: Bool {
         Calendar.current.isDateInToday(self)
     }
 
-    /// Returns `true` if the date is yesterday.
+    /// A Boolean value indicating whether the date is yesterday, using the current calendar.
+    @inlinable
     var isYesterday: Bool {
         Calendar.current.isDateInYesterday(self)
     }
 
-    /// Returns `true` if the date is tomorrow.
+    /// A Boolean value indicating whether the date is tomorrow, using the current calendar.
+    @inlinable
     var isTomorrow: Bool {
         Calendar.current.isDateInTomorrow(self)
     }
-    
-    /// Returns if the date is in the past.
+
+    /// A Boolean value indicating whether the date is in the past compared to the current moment.
+    @inlinable
     var isInPast: Bool {
         self < Date()
     }
-        
-    /// Returns if the date is in the future.
+
+    /// A Boolean value indicating whether the date is in the future compared to the current moment.
+    @inlinable
     var isInFuture: Bool {
         self > Date()
     }
 
-    // MARK: - Start & End of Day
+    // MARK: Day Boundaries
 
-    /// Returns the date representing the start of the day (00:00:00).
+    /// The start of the day (00:00:00) for this date, using the current calendar and time zone.
+    @inlinable
     var startOfDay: Date {
         Calendar.current.startOfDay(for: self)
     }
 
-    /// Returns the date representing the end of the day (23:59:59.999).
+    /// The end of the day (23:59:59) for this date, using the current calendar and time zone.
+    ///
+    /// - Note: This computes one second before the start of the following day. If the calculation fails,
+    ///   it returns `self`.
+    @inlinable
     var endOfDay: Date {
         guard let end = Calendar.current.date(byAdding: DateComponents(day: 1, second: -1), to: startOfDay) else {
             return self
@@ -78,15 +102,16 @@ public extension Date {
         return end
     }
 
-    // MARK: - Difference Calculations
+    // MARK: Differences
 
-    /// Returns the number of full days between another date and this one.
+    /// Returns the number of full days between another date and this date.
+    ///
+    /// Positive values indicate that this date occurs after `date`; negative values indicate it occurs before.
     ///
     /// - Parameter date: The date to compare to.
-    /// - Returns: The number of full days between the two dates.
+    /// - Returns: The number of full days between the two dates, or `0` if it cannot be computed.
+    @inlinable
     func days(from date: Date) -> Int {
         Calendar.current.dateComponents([.day], from: date, to: self).day ?? 0
     }
 }
-
-

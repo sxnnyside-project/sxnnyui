@@ -2,7 +2,7 @@
 //  ToastModifier.swift
 //  SxnnyUI
 //
-//  Created by TI on 16/04/25.
+//  Created by Sxnnyside Project on 16/04/25.
 //  Credits to Ondrej Kvasnovsky
 
 import SwiftUI

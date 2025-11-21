@@ -20,30 +20,43 @@ import SwiftUI
 /// - Example:
 /// ```swift
 /// Text("Example")
-///     .modifier(RoundedBorderModifier(color: .red, width: 3, radius: 12))
-///
-///     // Or using the extension:
-/// Text("Example")
 ///     .roundedBorder(color: .red, width: 3, radius: 12)
 /// ```
 ///
 /// This will display a `Text` view with a red border, 3 points wide, with 12-point corner radii.
-public struct RoundedBorderModifier: ViewModifier {
+@MainActor
+private struct RoundedBorderModifier: ViewModifier {
     let color: Color
     let width: CGFloat
     let radius: CGFloat
 
-    public func body(content: Content) -> some View {
+    init(color: Color = .blue, width: CGFloat = 2, radius: CGFloat = 8) {
+        self.color = color
+        self.width = width
+        self.radius = radius
+    }
+
+    func body(content: Content) -> some View {
         content
             .overlay(
-                RoundedRectangle(cornerRadius: radius)
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
                     .stroke(color, lineWidth: width)
             )
-            .cornerRadius(radius)
+            .clipShape(RoundedRectangle(cornerRadius: radius, style: .continuous))
     }
 }
 
+// MARK: - Public API
+
 public extension View {
+    /// Applies a rounded rectangle border to the view.
+    ///
+    /// - Parameters:
+    ///   - color: The color of the border. Defaults to `.blue`.
+    ///   - width: The width of the border line. Defaults to `2`.
+    ///   - radius: The corner radius of the border. Defaults to `8`.
+    /// - Returns: A view with the rounded border applied.
+    @MainActor
     func roundedBorder(color: Color = .blue, width: CGFloat = 2, radius: CGFloat = 8) -> some View {
         modifier(RoundedBorderModifier(color: color, width: width, radius: radius))
     }

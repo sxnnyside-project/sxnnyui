@@ -2,7 +2,7 @@
 //  FocusText.swift
 //  SxnnyUI
 //
-//  Created by Sxnnyside Proyect on 15/01/25.
+//  Created by Sxnnyside Project on 15/01/25.
 //
 
 import SwiftUI

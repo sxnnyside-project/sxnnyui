@@ -2,93 +2,166 @@
 //  StringProtocol.swift
 //  SxnnyUI
 //
-//  Created by Sxnnyide Proyesct on 31/01/25.
+//  Created by Sxnnyide Project on 31/01/25.
 //
 
 import Foundation
 
+// MARK: - StringProtocol Utilities
+
 public extension StringProtocol {
 
-    /// First letter in uppercase, rest the same.
+    // MARK: Casing
+
+    /// Returns a copy of the string with the first character uppercased.
+    ///
+    /// The remaining characters are left unchanged.
+    @inlinable
     var firstUppercased: String {
         prefix(1).uppercased() + dropFirst()
     }
 
-    /// First letter in uppercase, rest the same.
+    /// Returns a copy of the string with the first character capitalized (locale-aware).
+    ///
+    /// The remaining characters are left unchanged.
+    @inlinable
     var firstCapitalized: String {
         prefix(1).capitalized + dropFirst()
     }
 
-    /// First letter in lowercase, rest the same.
+    /// Returns a copy of the string with the first character lowercased.
+    ///
+    /// The remaining characters are left unchanged.
+    @inlinable
     var firstLowercased: String {
         prefix(1).lowercased() + dropFirst()
     }
 
-    /// Checks if the string is a valid email address.
+    // MARK: Validation
+
+    /// A Boolean value indicating whether the string matches a basic email address pattern.
+    ///
+    /// - Note: This uses a pragmatic regular expression and is not a complete RFC 5322 validator.
+    ///   It should be sufficient for most UI-level checks but may not accept all valid emails.
+    @inlinable
     var isValidEmail: Bool {
         let regex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
-        return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: self)
+        return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: String(self))
     }
 
-    /// Converts the string to CamelCase.
+    // MARK: Case Styles
+
+    /// Returns a camelCase version of the string.
+    ///
+    /// Non-alphanumeric separators are removed. The first component is lowercased; subsequent components are capitalized.
+    ///
+    /// Example:
+    /// - "hello world_test" -> "helloWorldTest"
+    @inlinable
     var camelCased: String {
-        let parts = self.components(separatedBy: CharacterSet.alphanumerics.inverted)
-        let first = parts.first?.lowercased() ?? ""
+        let parts = String(self)
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+        guard let first = parts.first?.lowercased() else { return "" }
         let rest = parts.dropFirst().map { $0.capitalized }.joined()
         return first + rest
     }
-    
-    /// Converts the string to snake_case.
+
+    /// Returns a snake_case version of the string.
+    ///
+    /// Inserts underscores between lowercase-to-uppercase boundaries and normalizes spaces and hyphens to underscores.
+    ///
+    /// Example:
+    /// - "helloWorld Test-Value" -> "hello_world_test_value"
+    @inlinable
     var snakeCased: String {
+        let base = String(self)
         let pattern = "([a-z0-9])([A-Z])"
         let regex = try? NSRegularExpression(pattern: pattern, options: [])
-        let range = NSRange(startIndex..., in: self)
-        let modString = regex?.stringByReplacingMatches(in: String(self), options: [], range: range, withTemplate: "$1_$2") ?? String(self)
-        return modString.lowercased()
+        let range = NSRange(base.startIndex..., in: base)
+        let withUnderscores = regex?.stringByReplacingMatches(
+            in: base,
+            options: [],
+            range: range,
+            withTemplate: "$1_$2"
+        ) ?? base
+
+        return withUnderscores
+            .replacingOccurrences(of: " ", with: "_")
+            .replacingOccurrences(of: "-", with: "_")
+            .lowercased()
     }
 
-    /// Converts the string to kebab-case.
+    /// Returns a kebab-case version of the string.
+    ///
+    /// Example:
+    /// - "helloWorld_test value" -> "hello-world-test-value"
+    @inlinable
     var kebabCased: String {
         snakeCased.replacingOccurrences(of: "_", with: "-")
     }
-        
-    /// Extracts the numeric characters from the string.
+
+    // MARK: Character Filtering and Trimming
+
+    /// Returns a string containing only the numeric characters in the receiver.
+    @inlinable
     var onlyNumbers: String {
         String(filter { $0.isNumber })
     }
 
-    /// Trim the string by removing leading and trailing whitespace and newlines.
+    /// Returns the string trimmed of leading and trailing whitespace and newlines.
+    @inlinable
     var trimmed: String {
         trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    /// Checks if the string is blank (empty or contains only whitespace).
+    /// A Boolean value indicating whether the string is empty or contains only whitespace and newlines.
+    @inlinable
     var isBlank: Bool {
         trimmed.isEmpty
     }
 
-    /// Counts the number of characters in the string.
+    /// The number of characters in the string.
+    ///
+    /// - Note: This is equivalent to `count` and is provided for readability.
+    @inlinable
     var length: Int {
         count
     }
 
-    /// Repeats the string a specified number of times.
+    // MARK: Transformations
+
+    /// Returns a new string formed by repeating the receiver the specified number of times.
+    ///
+    /// - Parameter times: The number of repetitions. Values less than or equal to zero return an empty string.
+    /// - Returns: A concatenated string with `times` repetitions.
+    @inlinable
     func repeated(_ times: Int) -> String {
         guard times > 0 else { return "" }
         return String(repeating: String(self), count: times)
     }
-    /// Reverses the string.
+
+    /// Returns a reversed copy of the string.
+    @inlinable
     var reversedString: String {
         String(reversed())
     }
 
-    /// Checks if the string contains only numeric characters.
+    // MARK: Numeric and Palindrome Checks
+
+    /// A Boolean value indicating whether the string can be parsed as a number using `Double`.
+    ///
+    /// - Note: This relies on `Double` parsing and is not locale-aware (e.g., commas as decimal separators may not be recognized).
+    @inlinable
     var isNumeric: Bool {
-        Double(self) != nil
+        Double(String(self)) != nil
     }
-    
-    /// Checks if the string is a palindrome.
+
+    /// A Boolean value indicating whether the string reads the same forwards and backwards.
+    ///
+    /// - Important: This comparison is case-sensitive and does not ignore whitespace or punctuation.
+    @inlinable
     var palindrome: Bool {
-        self == self.reversedString
+        String(self) == reversedString
     }
 }

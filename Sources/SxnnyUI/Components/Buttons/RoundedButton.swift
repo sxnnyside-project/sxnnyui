@@ -2,7 +2,7 @@
 //  RoundedButton.swift
 //  SxnnyUI
 //
-//  Created by Sxnnyside Proyect on 21/01/25.
+//  Created by Sxnnyside Project on 21/01/25.
 //
 
 
@@ -12,7 +12,7 @@ import SwiftUI
 //  RoundedButton.swift
 //  SxnnyUI
 //
-//  Created by Sxnnyside Proyect on 21/01/25.
+//  Created by Sxnnyside Project on 21/01/25.
 //
 
 import SwiftUI

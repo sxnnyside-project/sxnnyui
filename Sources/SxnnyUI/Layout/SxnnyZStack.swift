@@ -2,7 +2,7 @@
 //  SxnnyZStack.swift
 //  SxnnyUI
 //
-//  Created by TI on 23/05/25.
+//  Created by Sxnnyside Project on 23/05/25.
 //
 
 import SwiftUI

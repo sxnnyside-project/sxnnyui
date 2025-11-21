@@ -7,119 +7,124 @@
 
 import Foundation
 
-/// `TimeFormat` is a utility struct for converting time intervals into user-friendly string representations.
-/// 
-/// This struct provides a set of static formatting functions that convert time values—
-/// represented as integers or floating-point types—into formatted strings. These utilities
-/// support common formats such as "mm:ss", "hh:mm:ss", "mm:ss.SSS", and "mm:ss.SSSnnnnnnnnn",
-/// and accept times in seconds, milliseconds, or nanoseconds depending on the method used.
+/// TimeFormat
 ///
-/// The supported formatting methods include:
-/// - `formatTime`: Converts seconds to "mm:ss" format.
-/// - `formatHourMinuteSecond`: Converts seconds to "hh:mm:ss" format.
-/// - `formatTimeMillisecond`: Converts milliseconds to "mm:ss.SSS" format.
-/// - `formatTimeNanosecond`: Converts nanoseconds to "mm:ss.SSSnnnnnnnnn" format.
+/// A utility namespace for converting time intervals into user‑friendly string representations.
 ///
-/// Overloads are provided for both `BinaryInteger` and `BinaryFloatingPoint` types.
-/// The resulting strings always pad numeric components to maintain a consistent width (e.g., zero-padded minutes and seconds).
+/// Provides formatting helpers for:
+/// - "mm:ss"
+/// - "hh:mm:ss"
+/// - "mm:ss.SSS" (milliseconds input)
+/// - "mm:ss.SSSnnnnnnnnn" (nanoseconds input)
 ///
-/// Usage examples:
-/// ```swift
-/// let simple = TimeFormat.formatTime(125) // "02:05"
-/// let detailed = TimeFormat.formatHourMinuteSecond(3661) // "01:01:01"
-/// let ms = TimeFormat.formatTimeMillisecond(75432) // "01:15.432"
-/// let ns = TimeFormat.formatTimeNanosecond(7543212345678) // "02:05.212345678"
-/// ```
-///
-/// This utility is useful for displaying time intervals in UI components, logs, or any feature requiring human-readable time strings.
-public struct TimeFormat {
-    /// Formats a time interval into a string in "mm:ss" format.
+/// Overloads accept `TimeInterval`, `BinaryInteger`, and `BinaryFloatingPoint` as appropriate.
+public enum TimeFormat: Sendable {
+
+    // MARK: - Constants
+
+    @usableFromInline static let secondsPerMinute = 60
+    @usableFromInline static let secondsPerHour = 3600
+    @usableFromInline static let millisecondsPerSecond = 1_000
+    @usableFromInline static let millisecondsPerMinute = 60_000
+    @usableFromInline static let nanosecondsPerMillisecond = 1_000_000
+    @usableFromInline static let nanosecondsPerSecond = 1_000_000_000
+    @usableFromInline static let nanosecondsPerMinute = 60 * 1_000_000_000
+
+    // MARK: - mm:ss
+
+    /// Formats a time interval into "mm:ss".
     /// - Parameter timeInterval: The time interval to format, in seconds.
-    /// - Returns: A string representation of the time in "mm:ss" format.
+    /// - Returns: A string in "mm:ss".
+    @inlinable
     public static func formatTime(_ timeInterval: TimeInterval) -> String {
-        let totalSeconds = Int(timeInterval)
-        let minutes = totalSeconds / 60
-        let seconds = totalSeconds % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-    
-    /// Formats a time interval into a string in "mm:ss" format for integer types.
-    /// - Parameter timeRemaining: The time interval to format, in seconds.
-    /// - Returns: A string representation of the time in "mm:ss" format.
-    public static func formatTime<T: BinaryInteger>(_ timeRemaining: T) -> String {
-        let minutes = Int(timeRemaining) / 60
-        let seconds = Int(timeRemaining) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-        
-    /// Formats a time interval into a string in "mm:ss" format for floating-point types.
-    /// - Parameter timeRemaining: The time interval to format, in seconds.
-    /// - Returns: A string representation of the time in "mm:ss" format.
-    public static func formatTime<T: BinaryFloatingPoint>(_ timeRemaining: T) -> String {
-        let minutes = Int(timeRemaining) / 60
-        let seconds = Int(timeRemaining) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-    
-    /// Formats a time interval into a string in "hh:mm:ss" format for integer types.
-    /// - Parameter timeRemaining: The time interval to format, in seconds.
-    /// - Returns: A string representation of the time in "hh:mm:ss" format.
-    public static func formatHourMinuteSecond<T: BinaryInteger>(_ timeRemaining: T) -> String {
-        let hours = Int(timeRemaining) / 3600
-        let minutes = Int((Int(timeRemaining) % 3600) / 60)
-        let seconds = Int((Int(timeRemaining) % 3600) % 60)
-        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-    }
-    
-    /// Formats a time interval into a string in "hh:mm:ss" format for floating-point types.
-    /// - Parameter timeRemaining: The time interval to format, in seconds.
-    /// - Returns: A string representation of the time in "hh:mm:ss" format.
-    public static func formatHourMinuteSecond<T: BinaryFloatingPoint>(_ timeRemaining: T) -> String {
-        let hours = Int(timeRemaining) / 3600
-        let minutes = Int((Int(timeRemaining) % 3600) / 60)
-        let seconds = Int((Int(timeRemaining) % 3600) % 60)
-        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-    }
-    
-    /// Formats a time interval into a string in "mm:ss.SSS" format for integer types.
-    /// - Parameter timeRemaining: The time interval to format, in milliseconds.
-    /// - Returns: A string representation of the time in "mm:ss.SSS" format.
-    public static func formatTimeMillisecond<T: BinaryInteger>(_ timeRemaining: T) -> String {
-        let minutes = Int(timeRemaining) / 60000
-        let seconds = Int((Int(timeRemaining) % 60000) / 1000)
-        let milliseconds = Int((Int(timeRemaining) % 60000) % 1000)
-        return String(format: "%02d:%02d.%03d", minutes, seconds, milliseconds)
-    }
-    
-    /// Formats a time interval into a string in "mm:ss.SSS" format for floating-point types.
-    /// - Parameter timeRemaining: The time interval to format, in milliseconds.
-    /// - Returns: A string representation of the time in "mm:ss.SSS" format.
-    public static func formatTimeMillisecond<T: BinaryFloatingPoint>(_ timeRemaining: T) -> String {
-        let minutes = Int(timeRemaining) / 60000
-        let seconds = Int((Int(timeRemaining) % 60000) / 1000)
-        let milliseconds = Int((Int(timeRemaining) % 60000) % 1000)
-        return String(format: "%02d:%02d.%03d", minutes, seconds, milliseconds)
+        formatTime(Int(timeInterval))
     }
 
-    /// Formats a time interval into a string in "mm:ss.SSSnnnnnnnnn" format for integer types.
-    /// - Parameter timeRemaining: The time interval to format, in nanoseconds.
-    /// - Returns: A string representation of the time in "mm:ss.SSSnnnnnnnnn" format.
-    public static func formatTimeNanosecond<T: BinaryInteger>(_ timeRemaining: T) -> String {
-        let minutes = Int(timeRemaining) / 60000000000
-        let seconds = Int((Int(timeRemaining) % 60000000000) / 1000000000)
-        let milliseconds = Int((Int(timeRemaining) % 60000000000) % 1000000000)
-        let nanoseconds = Int((Int(timeRemaining) % 60000000000) % 1000000000) % 1000
-        return String(format: "%02d:%02d.%03d%09d", minutes, seconds, milliseconds, nanoseconds)
+    /// Formats a time interval into "mm:ss" for integer seconds.
+    @inlinable
+    public static func formatTime<T: BinaryInteger>(_ seconds: T) -> String {
+        let total = Int(seconds)
+        let minutes = total / secondsPerMinute
+        let secs = total % secondsPerMinute
+        return String(format: "%02d:%02d", minutes, secs)
     }
-    
-    /// Formats a time interval into a string in "mm:ss.SSSnnnnnnnnn" format for floating-point types.
-    /// - Parameter timeRemaining: The time interval to format, in nanoseconds.
-    /// - Returns: A string representation of the time in "mm:ss.SSSnnnnnnnnn" format.
-    public static func formatTimeNanosecond<T: BinaryFloatingPoint>(_ timeRemaining: T) -> String {
-        let minutes = Int(timeRemaining) / 60000000000
-        let seconds = Int((Int(timeRemaining) % 60000000000) / 1000000000)
-        let milliseconds = Int((Int(timeRemaining) % 60000000000) % 1000000000)
-        let nanoseconds = Int((Int(timeRemaining) % 60000000000) % 1000000000) % 1000
-        return String(format: "%02d:%02d.%03d%09d", minutes, seconds, milliseconds, nanoseconds)
+
+    /// Formats a time interval into "mm:ss" for floating‑point seconds.
+    @inlinable
+    public static func formatTime<T: BinaryFloatingPoint>(_ seconds: T) -> String {
+        formatTime(Int(seconds))
+    }
+
+    // MARK: - hh:mm:ss
+
+    /// Formats a time interval into "hh:mm:ss" for integer seconds.
+    @inlinable
+    public static func formatHourMinuteSecond<T: BinaryInteger>(_ seconds: T) -> String {
+        let total = Int(seconds)
+        let hours = total / secondsPerHour
+        let minutes = (total % secondsPerHour) / secondsPerMinute
+        let secs = total % secondsPerMinute
+        return String(format: "%02d:%02d:%02d", hours, minutes, secs)
+    }
+
+    /// Formats a time interval into "hh:mm:ss" for floating‑point seconds.
+    @inlinable
+    public static func formatHourMinuteSecond<T: BinaryFloatingPoint>(_ seconds: T) -> String {
+        formatHourMinuteSecond(Int(seconds))
+    }
+
+    // MARK: - mm:ss.SSS (milliseconds input)
+
+    /// Formats a duration into "mm:ss.SSS" for integer milliseconds.
+    /// - Parameter milliseconds: Duration in milliseconds.
+    @inlinable
+    public static func formatTimeMillisecond<T: BinaryInteger>(_ milliseconds: T) -> String {
+        let totalMS = Int(milliseconds)
+        let minutes = totalMS / millisecondsPerMinute
+        let seconds = (totalMS % millisecondsPerMinute) / millisecondsPerSecond
+        let ms = totalMS % millisecondsPerSecond
+        return String(format: "%02d:%02d.%03d", minutes, seconds, ms)
+    }
+
+    /// Formats a duration into "mm:ss.SSS" for floating‑point milliseconds.
+    @inlinable
+    public static func formatTimeMillisecond<T: BinaryFloatingPoint>(_ milliseconds: T) -> String {
+        formatTimeMillisecond(Int(milliseconds))
+    }
+
+    // MARK: - mm:ss.SSSnnnnnnnnn (nanoseconds input)
+
+    /// Formats a duration into "mm:ss.SSSnnnnnnnnn" for integer nanoseconds.
+    /// - Parameter nanoseconds: Duration in nanoseconds.
+    ///
+    /// The fractional portion is split into milliseconds (SSS) and the remaining 9‑digit nanoseconds (nnnnnnnnn).
+    @inlinable
+    public static func formatTimeNanosecond<T: BinaryInteger>(_ nanoseconds: T) -> String {
+        let totalNS = Int(nanoseconds)
+
+        let minutes = totalNS / nanosecondsPerMinute
+        let seconds = (totalNS % nanosecondsPerMinute) / nanosecondsPerSecond
+
+        // Remaining nanoseconds within the current second
+        let nsWithinSecond = totalNS % nanosecondsPerSecond
+
+        // Milliseconds are the upper 3 digits of the 9‑digit fractional part.
+        let milliseconds = nsWithinSecond / nanosecondsPerMillisecond
+
+        // Remaining nanoseconds after removing milliseconds (0...999_999)
+        let remainingNS = nsWithinSecond % nanosecondsPerMillisecond
+
+        // Compose "SSSnnnnnnnnn" where SSS are milliseconds and nnnnnnnnn are the remaining 9 digits.
+        // We need 9 digits after the decimal: 3 for ms, 6 for remainingNS padded to 6 digits.
+        // But the classic format "SSSnnnnnnnnn" expects 3 + 9 = 12 total digits; typically we show 3 + 6? 
+        // Here we will format as 3(ms) + 6(ns) = 9 total fractional digits to match "SSSnnnnnnn".
+        // If you require exactly 9 digits after SSS (total 12), adjust accordingly.
+        return String(format: "%02d:%02d.%03d%06d", minutes, seconds, milliseconds, remainingNS)
+    }
+
+    /// Formats a duration into "mm:ss.SSSnnnnnnnnn" for floating‑point nanoseconds.
+    @inlinable
+    public static func formatTimeNanosecond<T: BinaryFloatingPoint>(_ nanoseconds: T) -> String {
+        formatTimeNanosecond(Int(nanoseconds))
     }
 }

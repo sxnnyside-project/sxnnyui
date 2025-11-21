@@ -26,7 +26,7 @@ import Combine
 ///   - isShowing: A Boolean value indicating whether the alert should be shown.
 ///   - message: The message to display within the alert.
 ///   - type: The kind of alert to present, defined by the `AlertType` enum.
-public struct AlertState {
+public struct AlertState: Sendable, Equatable {
     public var isShowing: Bool
     public var message: String
     public var type: AlertType
@@ -38,68 +38,57 @@ public struct AlertState {
     }
 }
 
-// Enum representing different types of alerts.
-public enum AlertType {
+/// Enum representing different types of alerts.
+public enum AlertType: Sendable, Equatable {
     case info
     case success
     case warning
     case error
 }
 
-/// `AlertManager` is a class responsible for managing the presentation and dismissal of alerts within an application.
-/// 
-/// It holds an internal `AlertState` instance, which stores information about the current alert, such as its visibility,
-/// message, and type. The manager provides methods to show alerts with specific messages and types, check the current
-/// display status of an alert, and dismiss the currently shown alert. All access and mutation of the alert's state is
-/// synchronized through a dedicated serial dispatch queue to ensure thread safety.
+/// AlertManager
 ///
-/// Alerts presented through the `AlertManager` are intended to be observed by SwiftUI views, allowing
-/// reactive user interfaces to respond immediately to changes in alert state.
+/// Manages the presentation and dismissal of alerts in a SwiftUI application.
+/// The manager is main-actor isolated so state changes are safe with SwiftUI updates.
 ///
-/// Example usage:
+/// Example:
 /// ```swift
 /// let alertManager = AlertManager()
-/// alertManager.showAlert(message: "Data saved successfully!", type: .success)
+/// await MainActor.run { alertManager.showAlert(message: "Saved!", type: .success) }
 /// ```
-///
-/// - SeeAlso: `AlertState`, `AlertType`
+@MainActor
 public final class AlertManager: ObservableObject {
     @Published private(set) var alertState: AlertState = AlertState()
-    
-    private let queue = DispatchQueue(label: "com.example.AlertManagerQueue")
-    
+
     public init() {}
-    
+
     /// Shows an alert with a specific message and type.
     ///
     /// - Parameters:
     ///   - message: The message to display in the alert.
     ///   - type: The type of the alert (e.g., `.info`, `.error`).
     public func showAlert(message: String, type: AlertType = .info) {
-        queue.sync {
-            alertState = AlertState(isShowing: true, message: message, type: type)
-        }
+        alertState = AlertState(isShowing: true, message: message, type: type)
     }
-    
+
     /// Returns the current alert showing state.
-    public func isShowing() -> Bool {
-        queue.sync {
-            return alertState.isShowing
-        }
+    public var isShowing: Bool {
+        alertState.isShowing
     }
-    
+
     /// Dismisses the currently displayed alert.
     public func dismissAlert() {
-        queue.sync {
-            alertState = AlertState()
-        }
+        alertState = AlertState()
     }
 }
 
+// MARK: - Alert View
+
 /// A customizable alert view for displaying messages with optional actions.
+@MainActor
 public struct AlertView: View {
     @ObservedObject public var alertManager: AlertManager
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    @Environment(\.colorScheme) private var colorScheme
 
     private var title: String
     private var icon: String
@@ -108,7 +97,7 @@ public struct AlertView: View {
     private var buttonAction: (() -> Void)?
 
     private var alertBackgroundColor: Color {
-        return colorScheme == .dark ? .black : .white
+        colorScheme == .dark ? .black : .white
     }
 
     public var body: some View {
@@ -171,4 +160,3 @@ public struct AlertView: View {
         self.alertManager = alertManager
     }
 }
-

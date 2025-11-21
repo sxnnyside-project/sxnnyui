@@ -2,7 +2,7 @@
 //  ShapeGradient.swift
 //  SxnnyUI
 //
-//  Created by Sxnnyside Proyect on 21/01/25.
+//  Created by Sxnnyside Project on 21/01/25.
 //
 
 
@@ -119,6 +119,7 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
+    @available(macOS 12.0, iOS 15.0, *)
     public static var indigobackgroundGradient: LinearGradient {
         return LinearGradient(
             gradient: Gradient(colors: [

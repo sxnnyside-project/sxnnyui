@@ -9,128 +9,174 @@ import Foundation
 import Security
 
 /// Errors that can occur during Keychain operations.
-///
-/// - dataConversionError: The provided data could not be converted to a format suitable for the Keychain (e.g., String to Data conversion failed).
-/// - itemNotFound: The requested item could not be found in the Keychain.
-/// - unexpectedData: The data retrieved from the Keychain was not in the expected format or could not be converted to the desired type.
-/// - unhandledError(status:): An unexpected OSStatus error code was returned from a Keychain API call, indicating an internal or unknown error.
-public enum KeychainError: Error {
+public enum KeychainError: Error, Sendable, Equatable {
+    /// The provided value could not be converted to or from Data.
     case dataConversionError
+    /// The requested item could not be found in the Keychain.
     case itemNotFound
+    /// The data retrieved from the Keychain was not in the expected format.
     case unexpectedData
+    /// An unexpected OSStatus error code was returned from a Keychain API call.
     case unhandledError(status: OSStatus)
 }
 
-/// A utility struct for managing secure storage of sensitive data using the Keychain.
+/// KeychainManager
 ///
-/// `KeychainManager` provides static methods for securely saving, retrieving, and deleting sensitive string data
-/// in the Keychain. It is designed to simplify integration with Apple's Keychain Services, ensuring that
-/// sensitive information such as passwords, tokens, and secrets are stored securely and can be easily accessed
-/// or managed when needed. The struct handles common errors, such as data conversion issues, missing items, or unexpected
-/// data, by throwing well-defined `KeychainError` values.
+/// A utility namespace for managing secure storage of sensitive data using the Keychain.
 ///
-/// ## Usage
+/// Provides Data- and String-based helpers for saving, retrieving, and deleting values.
+/// You can optionally specify a service name and accessibility level.
 ///
-/// - To save data:
-///     ```swift
-///     try KeychainManager.save(key: "com.example.token", value: "mySecretToken")
-///     ```
-/// - To retrieve data:
-///     ```swift
-///     let token = try KeychainManager.get(key: "com.example.token")
-///     ```
-/// - To delete data:
-///     ```swift
-///     try KeychainManager.delete(key: "com.example.token")
-///     ```
+/// Thread-safety: All functions are synchronous and safe to call from any thread.
 ///
-/// ## Error Handling
-///
-/// All methods throw `KeychainError` on failure. Use Swift's `do-catch` statements to handle errors gracefully.
-///
-/// ## Thread Safety
-///
-/// All operations are performed synchronously and are safe to call from any thread.
-///
-/// ## Security Note
-///
-/// Data stored in the Keychain is encrypted and protected by the system, making it suitable for storing secrets
-/// and other sensitive information.
-public struct KeychainManager {
+/// Security note: Keychain data is encrypted and protected by the system.
+public enum KeychainManager: Sendable {
 
-    /// Saves a value to the Keychain for a given key.
+    // MARK: - Defaults
+
+    /// Default service name used if none is supplied.
+    @usableFromInline
+    static let defaultService = Bundle.main.bundleIdentifier ?? "com.sxnnyui.keychain"
+
+    /// Default accessibility attribute.
+    @usableFromInline
+    static let defaultAccessibility = kSecAttrAccessibleAfterFirstUnlock as String
+
+    // MARK: - Data APIs
+
+    /// Saves data to the Keychain for a given key.
     ///
     /// - Parameters:
-    ///   - key: The key under which the value will be stored.
-    ///   - value: The value to store in the Keychain.
-    /// - Throws: A `KeychainError` if the operation fails.
-    public static func save(key: String, value: String) throws {
-        guard let data = value.data(using: .utf8) else {
-            throw KeychainError.dataConversionError
-        }
-
-        let query: [String: Any] = [
+    ///   - key: The account key under which the value will be stored.
+    ///   - data: The data to store.
+    ///   - service: Optional service name to namespace the item.
+    ///   - accessibility: Optional Keychain accessibility (e.g., kSecAttrAccessibleAfterFirstUnlock).
+    /// - Throws: `KeychainError` on failure.
+    @inlinable
+    public static func save(
+        key: String,
+        data: Data,
+        service: String = defaultService,
+        accessibility: String = defaultAccessibility
+    ) throws {
+        var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
+            kSecAttrService as String: service,
+            kSecAttrAccessible as String: accessibility,
             kSecValueData as String: data
         ]
 
-        // Delete any existing item with the same key to avoid duplicates.
+        // Delete existing item to avoid duplicates.
         SecItemDelete(query as CFDictionary)
 
-        // Add the new item to the Keychain.
+        // Add the new item.
         let status = SecItemAdd(query as CFDictionary, nil)
-        if status != errSecSuccess {
+        guard status == errSecSuccess else {
             throw KeychainError.unhandledError(status: status)
         }
     }
 
-    /// Retrieves a value from the Keychain for a given key.
+    /// Retrieves data from the Keychain for a given key.
     ///
-    /// - Parameter key: The key for which to retrieve the value.
-    /// - Returns: The value associated with the key.
-    /// - Throws: A `KeychainError` if the operation fails.
-    public static func get(key: String) throws -> String {
+    /// - Parameters:
+    ///   - key: The account key to look up.
+    ///   - service: Optional service name used when saving.
+    /// - Returns: The stored data.
+    /// - Throws: `KeychainError` on failure.
+    @inlinable
+    public static func get(
+        key: String,
+        service: String = defaultService
+    ) throws -> Data {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecReturnData as String: kCFBooleanTrue!,
+            kSecAttrService as String: service,
+            kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
 
-        var dataTypeRef: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
 
         guard status != errSecItemNotFound else {
             throw KeychainError.itemNotFound
         }
 
-        guard status == errSecSuccess else {
-            throw KeychainError.unhandledError(status: status)
+        guard status == errSecSuccess, let data = result as? Data else {
+            if status == errSecSuccess {
+                throw KeychainError.unexpectedData
+            } else {
+                throw KeychainError.unhandledError(status: status)
+            }
         }
 
-        guard let data = dataTypeRef as? Data,
-              let result = String(data: data, encoding: .utf8) else {
-            throw KeychainError.unexpectedData
-        }
-
-        return result
+        return data
     }
 
-    /// Deletes a value from the Keychain for a given key.
+    /// Deletes data from the Keychain for a given key.
     ///
-    /// - Parameter key: The key for which to delete the value.
-    /// - Throws: A `KeychainError` if the operation fails.
-    public static func delete(key: String) throws {
+    /// - Parameters:
+    ///   - key: The account key to delete.
+    ///   - service: Optional service name used when saving.
+    /// - Throws: `KeychainError` on failure.
+    @inlinable
+    public static func delete(
+        key: String,
+        service: String = defaultService
+    ) throws {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: key
+            kSecAttrAccount as String: key,
+            kSecAttrService as String: service
         ]
 
         let status = SecItemDelete(query as CFDictionary)
-
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw KeychainError.unhandledError(status: status)
         }
+    }
+
+    // MARK: - String convenience
+
+    /// Saves a string to the Keychain for a given key.
+    ///
+    /// - Parameters:
+    ///   - key: The account key under which the value will be stored.
+    ///   - value: The string to store (UTF‑8 encoded).
+    ///   - service: Optional service name to namespace the item.
+    ///   - accessibility: Optional Keychain accessibility (e.g., kSecAttrAccessibleAfterFirstUnlock).
+    /// - Throws: `KeychainError` on failure.
+    @inlinable
+    public static func save(
+        key: String,
+        value: String,
+        service: String = defaultService,
+        accessibility: String = defaultAccessibility
+    ) throws {
+        guard let data = value.data(using: .utf8) else {
+            throw KeychainError.dataConversionError
+        }
+        try save(key: key, data: data, service: service, accessibility: accessibility)
+    }
+
+    /// Retrieves a string from the Keychain for a given key.
+    ///
+    /// - Parameters:
+    ///   - key: The account key to look up.
+    ///   - service: Optional service name used when saving.
+    /// - Returns: The stored string (UTF‑8 decoded).
+    /// - Throws: `KeychainError` on failure.
+    @inlinable
+    public static func getString(
+        key: String,
+        service: String = defaultService
+    ) throws -> String {
+        let data = try get(key: key, service: service)
+        guard let string = String(data: data, encoding: .utf8) else {
+            throw KeychainError.unexpectedData
+        }
+        return string
     }
 }

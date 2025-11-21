@@ -5,89 +5,105 @@
 //  Created by Sxnnyside Project on 21/01/25.
 //
 
-import UIKit
+import Foundation
 
-/// # Logger
-/// 
-/// The `Logger` class provides a simple mechanism for throttling repeated log messages by identifier and time interval. 
-/// It enables rate-limited logging so that a given message (or group of messages, by identifier) will only be printed 
-/// once per interval (default: 60 seconds) unless reset. This helps prevent flooding the console or log output with 
-/// repetitive log entries.
+// MARK: - Internal state and implementation
+
+/// An internal actor that manages throttled logging state safely under Swift concurrency.
+private actor _LoggerState {
+    static let shared = _LoggerState()
+
+    /// Stores the last log time for each identifier.
+    private var lastLogTimes: [String: Date] = [:]
+
+    /// Returns true if the message for the identifier should be logged given the interval, and updates the timestamp.
+    func shouldLogAndUpdate(identifier: String, interval: TimeInterval, now: Date = Date()) -> Bool {
+        let last = lastLogTimes[identifier] ?? .distantPast
+        if now.timeIntervalSince(last) > interval {
+            lastLogTimes[identifier] = now
+            return true
+        }
+        return false
+    }
+
+    /// Resets the throttling timer for the given identifier.
+    func reset(identifier: String) {
+        lastLogTimes[identifier] = .distantPast
+    }
+
+    /// Clears all throttling timers.
+    func clearAll() {
+        lastLogTimes.removeAll()
+    }
+}
+
+// MARK: - Public API
+
+/// Logger
 ///
-/// ## Features
-/// - Logs messages to the console with throttling, based on a custom or default interval.
-/// - Supports group-based identifiers (such as `[debug]`, `[error]`) for controlling throttling of different log types.
-/// - Thread-safe through a private serial queue.
-/// - Provides utility methods for resetting or clearing log timers for identifiers.
+/// A simple, thread-safe logger that throttles repeated log messages by identifier and time interval.
+/// It prevents flooding the console with repetitive entries by only printing a given identifier
+/// once per interval (default: 60 seconds) unless reset.
 ///
-/// ## Usage
-/// - Use `Logger.log(_:identifier:interval:)` to log a message with throttling.
-/// - Use `Logger.resetTimer(for:)` to manually reset the throttling timer for a specific identifier.
-/// - Use `Logger.clearAllTimers()` to clear all throttling timers.
+/// Features:
+/// - Throttled logging by identifier.
+/// - Thread-safe via an internal actor.
+/// - Utility methods for resetting or clearing timers.
 ///
-/// ## Example
-/// ```swift
-/// Logger.log("This is a debug message.", identifier: "[debug]", interval: 30)
-/// Logger.log("This will only appear once every 30 seconds per identifier.")
-/// ```
-///
-/// ## Deprecations
-/// - `Logger.log(_:)` is deprecated. Use `Logger.log(_:identifier:interval:)` for more control.
-///
-/// ## Thread Safety
-/// - All log operations are serialized on a dedicated queue to ensure thread-safe access to shared timers.
-///
-/// ## Platform
-/// - This logger is designed for use on Apple platforms and prints messages using `print()`.
-public class Logger {
+/// Usage:
+/// - Logger.log("Message", identifier: "[debug]", interval: 30)
+/// - Logger.resetTimer(for: "[debug]")
+/// - Logger.clearAllTimers()
+public enum Logger {
     /// Default log interval in seconds.
     public static let defaultLogInterval: TimeInterval = 60
 
-    /// A dictionary to store the last log time for each identifier.
-    nonisolated(unsafe) private static var lastLogTimes: [String: Date] = [:]
-
-    /// A serial queue to ensure thread safety.
-    private static let queue = DispatchQueue(label: "com.example.LoggerQueue")
-
-    /// Logs a message with a specific identifier and interval.
+    /// Logs a message with a specific identifier and interval. Throttled per identifier.
     ///
     /// - Parameters:
     ///   - message: The message to log.
-    ///   - identifier: The group identifier for the log (e.g., `[debug]`, `[error]`).
+    ///   - identifier: The group identifier for the log (e.g., "[debug]", "[error]").
     ///   - interval: The time interval in seconds to throttle logs for this identifier. Defaults to `defaultLogInterval`.
-    public static func log(_ message: String, identifier: String, interval: TimeInterval = defaultLogInterval) {
-        queue.sync {
-            let now = Date()
-            let lastLogTime = lastLogTimes[identifier] ?? Date.distantPast
+    @discardableResult
+    public static func log(_ message: String, identifier: String, interval: TimeInterval = defaultLogInterval) -> Bool {
+        // Use async/await under the hood but keep a synchronous facade for convenience.
+        var didLog = false
+        let semaphore = DispatchSemaphore(value: 0)
 
-            if now.timeIntervalSince(lastLogTime) > interval {
+        Task {
+            let shouldLog = await _LoggerState.shared.shouldLogAndUpdate(identifier: identifier, interval: interval)
+            if shouldLog {
                 print("\(identifier) \(message)")
-                lastLogTimes[identifier] = now
+                didLog = true
             }
+            semaphore.signal()
         }
+
+        semaphore.wait()
+        return didLog
     }
 
-    /// Logs a message with the default interval. **Deprecated**: Use `log(_:identifier:interval:)` instead.
+    /// Logs a message with the default interval. Deprecated: Use `log(_:identifier:interval:)` instead.
     ///
     /// - Parameter message: The message to log.
     @available(*, deprecated, message: "Use log(_:identifier:interval:) instead.")
     public static func log(_ message: String) {
-        log(message, identifier: "[default]")
+        _ = log(message, identifier: "[default]")
     }
 
     /// Resets the timer for a specific identifier.
     ///
     /// - Parameter identifier: The group identifier whose timer should be reset.
     public static func resetTimer(for identifier: String) {
-        queue.sync {
-            lastLogTimes[identifier] = Date.distantPast
+        Task {
+            await _LoggerState.shared.reset(identifier: identifier)
         }
     }
 
     /// Clears all timers for all identifiers.
     public static func clearAllTimers() {
-        queue.sync {
-            lastLogTimes.removeAll()
+        Task {
+            await _LoggerState.shared.clearAll()
         }
     }
 }

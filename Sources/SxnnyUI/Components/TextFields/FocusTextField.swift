@@ -2,7 +2,7 @@
 //  FocusText.swift
 //  SxnnyUI
 //
-//  Created by TI on 30/04/25.
+//  Created by Sxnnyside Project on 30/04/25.
 //
 
 

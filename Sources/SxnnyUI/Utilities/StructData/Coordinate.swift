@@ -5,7 +5,7 @@
 //  Created by Sxnnyside Project on 21/01/25.
 //
 
-import Foundation
+import SwiftUI
 
 /// A data model representing a geographical coordinate with latitude and longitude.
 ///
@@ -16,15 +16,10 @@ import Foundation
 /// - Parameters:
 ///   - T: The numeric type used for latitude and longitude (e.g., `Double`, `Float`, `Int`).
 ///
-/// ## Usage Example
+/// Usage example:
 /// ```swift
 /// let cityCoordinate = Coordinate<Double>(latitude: 37.7749, longitude: -122.4194)
 /// ```
-///
-/// ## Conformance
-/// `Coordinate` conforms to `Equatable` and `Hashable`, making it suitable for use in sets, dictionaries,
-/// and other collections that require these protocols.
-///
 public struct Coordinate<T: Numeric & Comparable & Hashable>: Equatable, Hashable {
     /// The latitude of the coordinate.
     public let latitude: T
@@ -39,12 +34,18 @@ public struct Coordinate<T: Numeric & Comparable & Hashable>: Equatable, Hashabl
         self.latitude = latitude
         self.longitude = longitude
     }
-    
+
     /// Conforms to the `Hashable` protocol by combining the latitude and longitude values.
     /// - Parameter hasher: The hasher to use when combining the components of this instance
-    /// into a single hash value.
+    ///   into a single hash value.
     public func hash(into hasher: inout Hasher) {
         hasher.combine(latitude)
         hasher.combine(longitude)
     }
 }
+
+// MARK: - Conditional conformances
+
+extension Coordinate: Sendable where T: Sendable {}
+
+extension Coordinate: Codable where T: Codable {}
