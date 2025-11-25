@@ -65,30 +65,26 @@ public enum Logger {
     ///   - identifier: The group identifier for the log (e.g., "[debug]", "[error]").
     ///   - interval: The time interval in seconds to throttle logs for this identifier. Defaults to `defaultLogInterval`.
     @discardableResult
-    public static func log(_ message: String, identifier: String, interval: TimeInterval = defaultLogInterval) -> Bool {
-        // Use async/await under the hood but keep a synchronous facade for convenience.
-        var didLog = false
-        let semaphore = DispatchSemaphore(value: 0)
-
-        Task {
-            let shouldLog = await _LoggerState.shared.shouldLogAndUpdate(identifier: identifier, interval: interval)
-            if shouldLog {
-                print("\(identifier) \(message)")
-                didLog = true
+    public static func log(_ message: String, identifier: String, interval: TimeInterval = defaultLogInterval) async -> Bool {
+        let shouldLog = await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
+            Task {
+                let shouldLog = await _LoggerState.shared.shouldLogAndUpdate(identifier: identifier, interval: interval)
+                continuation.resume(returning: shouldLog)
             }
-            semaphore.signal()
         }
-
-        semaphore.wait()
-        return didLog
+        if shouldLog {
+            print("\(identifier) \(message)")
+            return true
+        }
+        return false
     }
 
     /// Logs a message with the default interval. Deprecated: Use `log(_:identifier:interval:)` instead.
     ///
     /// - Parameter message: The message to log.
     @available(*, deprecated, message: "Use log(_:identifier:interval:) instead.")
-    public static func log(_ message: String) {
-        _ = log(message, identifier: "[default]")
+    public static func log(_ message: String) async {
+        _ = await log(message, identifier: "[default]")
     }
 
     /// Resets the timer for a specific identifier.

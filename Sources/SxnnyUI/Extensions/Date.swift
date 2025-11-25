@@ -17,7 +17,7 @@ public extension Date {
     ///
     /// Uses the format `"yyyy-MM-dd HH:mm:ss"` with the `en_US_POSIX` locale, which is a stable,
     /// non-user-facing locale appropriate for fixed-format parsing and formatting.
-    private static let defaultFormatter: DateFormatter = {
+    static let defaultFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         formatter.locale = Locale(identifier: "en_US_POSIX")

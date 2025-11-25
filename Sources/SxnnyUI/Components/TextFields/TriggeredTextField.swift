@@ -4,49 +4,81 @@
 //
 //  Created by Sxnnyside Project on 21/01/25.
 //
+//  This file defines a SwiftUI wrapper for UITextField, providing
+//  a bindable text field with customization for placeholder and background color.
+//  APIs follow Swift package and cross-platform best practices.
+//
 
 import SwiftUI
 
-/// A SwiftUI wrapper for `UITextField` that provides additional customization and functionality.
-/// The `TriggeredTextField` allows for binding text, setting a placeholder, and customizing the background color.
-/// It uses a `Coordinator` to handle delegate methods and text changes.
+#if canImport(UIKit) && !os(watchOS)
+import UIKit
+
+/// A SwiftUI wrapper for `UITextField` with bindable content and customization.
+///
+/// Use this view to display a UIKit `UITextField` within SwiftUI, allowing for binding,
+/// placeholder, and background color customization. Handles text changes and return key events.
+///
+/// Example usage:
+/// ```swift
+/// @State private var text = ""
+///
+/// TriggeredTextField(
+///     text: $text,
+///     placeholder: "Enter name",
+///     backgroundColor: .systemGray6
+/// )
+/// ```
+///
+/// - Note: Available only on platforms where UIKit is present (not watchOS).
+/// - Important: Text updates are capitalized automatically in this implementation for demonstration.
+///
+@MainActor
 public struct TriggeredTextField: UIViewRepresentable {
-    /// A coordinator class to manage `UITextField` delegate methods and handle text changes.
+    // MARK: - Coordinator
+
+    /// Coordinator for delegate and action handling.
     public class Coordinator: NSObject, UITextFieldDelegate {
-        /// A reference to the parent `TriggeredTextField`.
+        /// Reference to the parent field for updating binding.
         var parent: TriggeredTextField
-        
-        /// Initializes a new instance of `Coordinator`.
-        /// - Parameter parent: The parent `TriggeredTextField` instance.
+
+        /// Initializes the coordinator.
+        /// - Parameter parent: Parent field.
         init(parent: TriggeredTextField) {
             self.parent = parent
         }
-        
-        /// Handles the return key press on the `UITextField`.
-        /// - Parameter textField: The `UITextField` instance.
-        /// - Returns: A Boolean value indicating whether the text field should process the return key.
+
+        /// Handles return key events.
         public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
             textField.resignFirstResponder()
             return true
         }
+
+        /// Updates the binding on text change.
+        @objc func textChanged(_ textField: UITextField) {
+            parent.text = textField.text ?? ""
+        }
     }
-    
-    /// A binding to the text content of the text field.
+
+    // MARK: - Bindings & Properties
+
+    /// Bindable text content.
     @Binding public var text: String
-    /// The placeholder text displayed when the text field is empty.
+
+    /// Placeholder shown when empty.
     public var placeholder: String
+
     /// The background color of the text field.
     public var backgroundColor: UIColor
-    
-    /// Creates a coordinator instance to manage the text field's delegate methods.
-    /// - Returns: A new `Coordinator` instance.
+
+    // MARK: - UIViewRepresentable
+
+    /// Creates the coordinator for delegate and target/action.
     public func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
     }
-    
-    /// Creates the `UITextField` instance and configures its properties.
-    /// - Parameter context: The context containing the coordinator.
-    /// - Returns: A configured `UITextField` instance.
+
+    /// Creates and configures the UIKit text field.
     public func makeUIView(context: Context) -> UITextField {
         let textField = UITextField(frame: .zero)
         textField.delegate = context.coordinator
@@ -59,33 +91,56 @@ public struct TriggeredTextField: UIViewRepresentable {
         textField.addTarget(context.coordinator, action: #selector(Coordinator.textChanged(_:)), for: .editingChanged)
         return textField
     }
-    
-    /// Updates the `UITextField` instance with new data.
-    /// - Parameters:
-    ///   - uiView: The `UITextField` instance.
-    ///   - context: The context containing the coordinator.
+
+    /// Updates the UIKit text field with new binding values.
     public func updateUIView(_ uiView: UITextField, context: Context) {
-        let capitalizedText = text.capitalized
+        let capitalizedText = text.capitalized // Example: auto-capitalization
         uiView.text = capitalizedText
         uiView.backgroundColor = backgroundColor
     }
-    
-    /// Initializes a new instance of `TriggeredTextField`.
+
+    // MARK: - Initialization
+
+    /// Creates a new triggered text field.
+    ///
     /// - Parameters:
-    ///   - text: A binding to the text content of the text field.
-    ///   - placeholder: The placeholder text displayed when the text field is empty.
-    ///   - backgroundColor: The background color of the text field.
-    public init(text: Binding<String>, placeholder: String, backgroundColor: UIColor) {
+    ///   - text: Bindable string content.
+    ///   - placeholder: Placeholder text shown when empty.
+    ///   - backgroundColor: Background color for the text field.
+    public init(
+        text: Binding<String>,
+        placeholder: String,
+        backgroundColor: UIColor
+    ) {
         self._text = text
         self.placeholder = placeholder
         self.backgroundColor = backgroundColor
     }
 }
 
-public extension TriggeredTextField.Coordinator {
-    /// Handles text changes in the `UITextField` and updates the parent binding.
-    /// - Parameter textField: The `UITextField` instance.
-    @objc func textChanged(_ textField: UITextField) {
-        parent.text = textField.text ?? ""
+#else
+
+/// A no-op stub for platforms without UIKit.
+@MainActor
+public struct TriggeredTextField: View {
+    @Binding public var text: String
+    public var placeholder: String
+    public var backgroundColor: Any
+
+    public var body: some View {
+        // Empty view for non-UIKit platforms.
+        EmptyView()
+    }
+
+    public init(
+        text: Binding<String>,
+        placeholder: String,
+        backgroundColor: Any
+    ) {
+        self._text = text
+        self.placeholder = placeholder
+        self.backgroundColor = backgroundColor
     }
 }
+
+#endif

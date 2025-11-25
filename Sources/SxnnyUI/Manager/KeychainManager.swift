@@ -59,7 +59,7 @@ public enum KeychainManager: Sendable {
         service: String = defaultService,
         accessibility: String = defaultAccessibility
     ) throws {
-        var query: [String: Any] = [
+        let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
             kSecAttrService as String: service,

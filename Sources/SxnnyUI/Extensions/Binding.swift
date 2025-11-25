@@ -16,7 +16,6 @@ public extension Binding where Value == Int {
     /// using `Int(_:)`, which truncates toward zero.
     ///
     /// - Important: Fractional values are truncated when written back to the `Int`.
-    @inlinable
     var double: Binding<Double> {
         Binding<Double>(
             get: { Double(self.wrappedValue) },
@@ -32,7 +31,6 @@ public extension Binding where Value == Double {
     /// Writing converts the integer to a double.
     ///
     /// - Important: Fractional precision is lost when converting to an `Int`.
-    @inlinable
     var int: Binding<Int> {
         Binding<Int>(
             get: { Int(self.wrappedValue) },
@@ -50,7 +48,6 @@ public extension Binding where Value: Comparable {
     ///
     /// - Parameter limits: The allowed closed range for the value.
     /// - Returns: A binding that enforces the provided range on write.
-    @inlinable
     func clamped(to limits: ClosedRange<Value>) -> Binding<Value> {
         Binding<Value>(
             get: { self.wrappedValue },
@@ -69,9 +66,8 @@ public extension Binding {
     ///
     /// - Parameter defaultValue: The value to use when the optional is `nil`.
     /// - Returns: A `Binding<T>` that projects a non-optional view over an optional binding.
-    @inlinable
     func replacingNil<T>(with defaultValue: T) -> Binding<T>
-    where Value == Optional<T>, T: Sendable {
+    where Value == Optional<T> {
         Binding<T>(
             get: { self.wrappedValue ?? defaultValue },
             set: { self.wrappedValue = $0 }
@@ -87,7 +83,6 @@ public extension Binding where Value: Comparable {
     /// - Parameter target: The value to compare against.
     /// - Returns: A boolean binding reflecting equality. Writing `true` sets the wrapped value to `target`;
     ///   writing `false` is a no-op.
-    @inlinable
     func isEqual(to target: Value) -> Binding<Bool> {
         Binding<Bool>(
             get: { self.wrappedValue == target },

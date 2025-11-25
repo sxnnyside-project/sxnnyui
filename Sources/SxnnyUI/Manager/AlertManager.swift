@@ -109,27 +109,47 @@ public struct AlertView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }, label: {
                     HStack {
-                        Image(systemName: icon)
-                            .foregroundStyle(color)
+                        // Icon
+                        if #available(macOS 11.0, *) {
+                            if #available(macOS 12.0, *) {
+                                Image(systemName: icon)
+                                    .foregroundStyle(color)
+                            } else {
+                                Image(systemName: icon)
+                                    .foregroundColor(color)
+                            }
+                        } else {
+                            // fallback: simple text
+                            Text("⚠️")
+                        }
                         Text(title)
                             .font(.headline)
                             .fontWeight(.bold)
                     }
                 })
 
-                Button(buttonLabel) {
-                    buttonAction?()
-                    alertManager.dismissAlert()
+                // Button
+                if #available(macOS 12.0, *) {
+                    Button(buttonLabel) {
+                        buttonAction?()
+                        alertManager.dismissAlert()
+                    }
+                    .padding(.top, 10)
+                    .buttonStyle(.borderedProminent)
+                } else {
+                    Button(buttonLabel) {
+                        buttonAction?()
+                        alertManager.dismissAlert()
+                    }
+                    .padding(.top, 10)
                 }
-                .padding(.top, 10)
-                .buttonStyle(.borderedProminent)
             }
             .padding()
             .background(RoundedRectangle(cornerRadius: 15).fill(alertBackgroundColor.opacity(0.9)))
             .frame(maxWidth: 300)
             .padding()
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(title), \(alertManager.alertState.message)")
+            .applyAccessibilityLabel(title: title, message: alertManager.alertState.message)
             .transition(.opacity)
             .animation(.easeInOut, value: alertManager.alertState.isShowing)
         }
@@ -158,5 +178,17 @@ public struct AlertView: View {
         self.buttonLabel = buttonLabel
         self.buttonAction = buttonAction
         self.alertManager = alertManager
+    }
+}
+
+// Accessibility label compatibility
+private extension View {
+    @ViewBuilder
+    func applyAccessibilityLabel(title: String, message: String) -> some View {
+        if #available(macOS 11.0, *) {
+            self.accessibilityLabel("\(title), \(message)")
+        } else {
+            self
+        }
     }
 }

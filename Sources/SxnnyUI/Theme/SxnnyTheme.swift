@@ -17,7 +17,11 @@ import SwiftUI
 /// - `defaultPadding`: The standard padding value for component content insets.
 /// - `cornerRadius`: The standard corner radius for rounded UI components.
 public struct SxnnyTheme {
+    #if canImport(UIKit) && !os(watchOS)
     public static let background: Color = Color(.systemBackground)
+    #else
+    public static let background: Color = Color(NSColor.windowBackgroundColor)
+    #endif
     public static let primary: Color = Color(hex: "#FFB700")
     public static let accentColor: Color = Color(hex: "#FFB700")
     public static let defaultSpacing: CGFloat = 12

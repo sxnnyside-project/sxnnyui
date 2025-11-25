@@ -1,62 +1,114 @@
 //
-//  LabeledTextfield.swift
+//  LabeledTextField.swift
 //  SxnnyUI
 //
 //  Created by Sxnnyside Project on 21/01/25.
 //
-
+//  This file defines a labeled numeric text field with focus, disabled, and placeholder support.
+//  All APIs are documented for clarity and platform compatibility, suitable for Swift package use.
+//
 
 import SwiftUI
 
-/// A SwiftUI view representing a labeled text field with a placeholder and value binding.
-/// This view supports decimal input, focus state management, and enables or disables user interaction.
+/// A labeled text field for numeric values, supporting placeholder, focus, and disabled state.
 ///
-/// The `LabeledTextfield` is designed for scenarios where a text field requires a label and placeholder,
-/// with additional customization for focus and disabled states.
+/// Use this view in forms where you need a label, a floating-point entry field, and
+/// control over whether the field is focused or disabled.
+///
+/// Example usage:
+/// ```swift
+/// @State private var value: Double = 0.0
+/// @State private var disabled = false
+/// @FocusState private var isFocused: Bool
+///
+/// LabeledTextField(
+///     text: "Total",
+///     placeholder: "Enter amount",
+///     disabled: $disabled,
+///     value: $value,
+///     isFocused: $isFocused
+/// )
+/// ```
+///
+/// - Important: Requires macOS 12.0+, iOS 15.0+, tvOS 15.0+, or watchOS 8.0+ due to focus state.
+/// - Note: Decimal keyboard type is only available on iOS.
+///
+@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+@MainActor
 public struct LabeledTextField: View {
-    /// The label text displayed alongside the text field.
+    // MARK: - Properties
+
+    /// The label displayed next to the text field.
     public let text: String
-    /// The placeholder text displayed when the text field is empty.
+
+    /// The placeholder, shown when the value is empty or zero.
     public let placeholder: String
-    /// A binding to control whether the text field is disabled.
-    @Binding public var Disabled: Bool
-    /// A binding to the numeric value entered in the text field.
+
+    /// Bindable disabled state for the text field.
+    @Binding public var disabled: Bool
+
+    /// The bound floating-point value displayed and edited in the field.
     @Binding public var value: Double
-    /// A focus state binding to manage the focus of the text field.
+
+    /// Bindable focus state for the text field.
     @FocusState.Binding public var isFocused: Bool
 
-    /// The body of the `LabeledTextfield` view.
-    public var body: some View {
-        TextField(text, value: $value, formatter: FloatFormatter())
-            .keyboardType(.decimalPad)
-            .multilineTextAlignment(.leading)
-            .padding(.trailing, 10)
-            .textFieldStyle(.roundedBorder)
-            .focused($isFocused)
-            .disabled(Disabled)
-            .disableAutocorrection(true)
-            .overlay(
-                HStack {
-                    Spacer()
-                    Text(placeholder)
-                        .foregroundColor(.gray)
-                        .padding(.trailing, 20)
-                }
-            )
-    }
+    // MARK: - Initialization
 
-    /// Initializes a new instance of `LabeledTextfield`.
+    /// Creates a labeled numeric text field.
+    ///
     /// - Parameters:
-    ///   - text: The label text displayed alongside the text field.
-    ///   - placeholder: The placeholder text displayed when the text field is empty.
-    ///   - Disabled: A binding to control whether the text field is disabled.
-    ///   - value: A binding to the numeric value entered in the text field.
-    ///   - isFocused: A focus state binding to manage the focus of the text field.
-    public init(text: String, placeholder: String, Disabled: Binding<Bool>, value: Binding<Double>, isFocused: FocusState<Bool>.Binding) {
+    ///   - text: The label shown next to the field.
+    ///   - placeholder: Placeholder shown when field is empty or zero.
+    ///   - disabled: Whether the field is user-editable.
+    ///   - value: The numeric value bound to the field.
+    ///   - isFocused: The focus state binding for this field.
+    public init(
+        text: String,
+        placeholder: String,
+        disabled: Binding<Bool>,
+        value: Binding<Double>,
+        isFocused: FocusState<Bool>.Binding
+    ) {
         self.text = text
         self.placeholder = placeholder
-        self._Disabled = Disabled
+        self._disabled = disabled
         self._value = value
         self._isFocused = isFocused
+    }
+
+    // MARK: - View
+
+    /// The labeled text field content.
+    public var body: some View {
+        HStack {
+            Text(text)
+            ZStack(alignment: .leading) {
+                if shouldShowPlaceholder {
+                    Text(placeholder)
+                        .foregroundColor(.gray)
+                        .padding(.leading, 4)
+                }
+                #if os(iOS)
+                TextField("", value: $value, formatter: FloatFormatter())
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(.roundedBorder)
+                #else
+                TextField("", value: $value, formatter: FloatFormatter())
+                    .textFieldStyle(.roundedBorder)
+                #endif
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .padding(.trailing, 10)
+        .disabled(disabled)
+        .focused($isFocused)
+    }
+
+    // MARK: - Private Helpers
+
+    /// Determines whether the placeholder should be visible.
+    private var shouldShowPlaceholder: Bool {
+        FloatFormatter.string(from: value)?.isEmpty != false
     }
 }

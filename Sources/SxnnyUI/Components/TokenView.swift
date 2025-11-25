@@ -4,46 +4,68 @@
 //
 //  Created by Sxnnyside Project on 21/01/25.
 //
+//  This file defines `TokenView`, a SwiftUI view that displays a token with an optional
+//  badge for deletion. The implementation follows Swift package and documentation best
+//  practices, offering clear API semantics and compatibility handling.
+//
 
 import SwiftUI
 
-/// A SwiftUI view that represents a token with a badge for deletion.
+// MARK: - TokenView
+
+/// A view that displays a token with an optional badge for deletion.
 ///
-/// The `TokenView` displays a token's text and provides an interactive badge
-/// that allows the user to delete the token when tapped.
+/// `TokenView` presents the token's text and overlays a badge that, when tapped,
+/// triggers the provided deletion closure. This is useful for tag editors, multi-selection
+/// lists, and similar scenarios.
 ///
-/// - Parameters:
-///   - token: The `Token` object containing the text to display.
-///   - onDelete: A closure that is called when the token is deleted.
+/// Example usage:
+/// ```swift
+/// TokenView(token: myToken) { token in
+///     // Handle deletion
+/// }
+/// ```
 public struct TokenView: View {
-    /// The token to be displayed.
+    /// The token to display.
     public var token: Token
     
-    /// A closure that is triggered when the token is deleted.
+    /// A closure invoked when the token is deleted.
     public var onDelete: (Token) -> Void
 
-    /// Initializes a new `TokenView`.
+    /// Creates a new `TokenView`.
     ///
     /// - Parameters:
-    ///   - token: The `Token` object to display.
-    ///   - onDelete: A closure to handle the deletion of the token.
+    ///   - token: The token object whose text is displayed.
+    ///   - onDelete: A closure called when the token is tapped for deletion.
     public init(token: Token, onDelete: @escaping (Token) -> Void) {
         self.token = token
         self.onDelete = onDelete
     }
 
-    /// The content and behavior of the `TokenView`.
+    /// The view’s body, rendering the text with a badge for deletion.
     public var body: some View {
         HStack {
-            Text(token.text)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.blue.opacity(0.2))
-                .cornerRadius(8)
-                .badge(imageName: "xmark")
-                .onTapGesture {
-                    onDelete(token)
-                }
+            if #available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *) {
+                Text(token.text)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.blue.opacity(0.2))
+                    .cornerRadius(8)
+                    .badge(imageName: "xmark")
+                    .onTapGesture {
+                        onDelete(token)
+                    }
+            } else {
+                // Fallback for earlier platforms: render without badge
+                Text(token.text)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.blue.opacity(0.2))
+                    .cornerRadius(8)
+                    .onTapGesture {
+                        onDelete(token)
+                    }
+            }
         }
     }
 }

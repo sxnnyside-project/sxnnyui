@@ -4,84 +4,118 @@
 //
 //  Created by Sxnnyside Project on 21/01/25.
 //
+//  This file defines a generic swipeable label/content view for SxnnyUI, with
+//  platform and OS availability handling. APIs are documented for Swift package use.
+//
+//  Example usage:
+//  ```swift
+//  if #available(iOS 15.0, macOS 12.0, *) {
+//      LabelSwipeable("New", systemImage: "star.fill") {
+//          print("Swiped!")
+//      }
+//      .swipeEdge(.trailing)
+//  }
+//  ```
+//
 
 import SwiftUI
 
-/// A custom view that displays a label or custom content with swipeable actions.
-/// The swipe action is configured to appear on the leading edge with a green "plus" icon.
+// MARK: - LabelSwipeable
+
+/// A generic view that displays a label or custom content with a configurable swipe action.
+/// Supports custom swipe edges via environment. Falls back gracefully on unsupported platforms.
+///
+/// > Note: Swipe actions require iOS 15.0+, macOS 12.0+, tvOS 15.0+, or watchOS 8.0+.
+///
+@MainActor
 public struct LabelSwipeable<Content: View>: View {
-    /// The content of the view, which can be a `Label` or any custom view.
+    // MARK: Content & Action
+
     private let content: Content
-    /// The action to perform when the swipe action is triggered.
     private let action: () -> Void
-    /// The swipe edge, configurable via the environment.
-    @Environment(\.swipeEdge) private var swipeEdge
 
+    // MARK: Environment
 
-    /// Initializes a `LabelSwipeable` with a deprecated initializer.
-    /// - Parameters:
-    ///   - icon: The name of the system image to display in the label.
-    ///   - text: The text to display in the label.
-    ///   - action: The action to perform when the swipe action is triggered.
+    @Environment(\.self) private var environment
+
+    // MARK: Initializers
+
     @available(*, deprecated, message: "Use init(_ title: String, systemImage: String, action: @escaping () -> Void)")
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     public init(icon: String, text: String, action: @escaping () -> Void) where Content == Label<Text, Image> {
         self.content = Label(text, systemImage: icon)
         self.action = action
     }
 
-    /// Initializes a `LabelSwipeable` with a title and system image.
-    /// - Parameters:
-    ///   - title: The text to display in the label.
-    ///   - systemImage: The name of the system image to display in the label.
-    ///   - action: The action to perform when the swipe action is triggered.
+    @available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
     public init(_ title: String, systemImage: String, action: @escaping () -> Void) where Content == Label<Text, Image> {
         self.content = Label(title, systemImage: systemImage)
         self.action = action
     }
 
-    /// Initializes a `LabelSwipeable` with custom content.
-    /// - Parameters:
-    ///   - action: The action to perform when the swipe action is triggered.
-    ///   - content: A closure that provides the custom content for the view.
     public init(action: @escaping () -> Void, @ViewBuilder content: () -> Content) {
         self.content = content()
         self.action = action
     }
 
-    /// The body of the `LabelSwipeable` view.
-    /// Displays the content with a swipe action configured on the leading edge.
+    // MARK: View Body
+
     public var body: some View {
-        content
-            .swipeActions(
-                edge: swipeEdge,
-                allowsFullSwipe: true
-            ) {
-                Button(action: action) {
-                    Image(systemName: "plus.circle.fill")
-                        .tint(.green)
-                }
+        Group {
+            if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
+                content
+                    .swipeActions(edge: swipeEdge, allowsFullSwipe: true) {
+                        Button(action: action) {
+                            SwipeableIcon()
+                        }
+                    }
+            } else {
+                content
             }
+        }
+    }
+
+    // Only use HorizontalEdge and environment.swipeEdge when available
+    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    private var swipeEdge: HorizontalEdge {
+        environment.swipeEdge
+    }
+
+    @ViewBuilder
+    private func SwipeableIcon() -> some View {
+        if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
+            Image(systemName: "plus.circle.fill")
+                .tint(.green)
+        } else if #available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *) {
+            Image(systemName: "plus.circle.fill")
+                .foregroundColor(.green)
+        } else {
+            EmptyView()
+        }
     }
 }
 
-/// A custom environment key to specify the swipe edge.
+// MARK: - Environment Key for Swipe Edge
+
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 private struct SwipeEdgeKey: EnvironmentKey {
     static let defaultValue: HorizontalEdge = .leading
 }
 
+@available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
 extension EnvironmentValues {
-    /// The swipe edge for the `SwipeableModifier`.
     var swipeEdge: HorizontalEdge {
         get { self[SwipeEdgeKey.self] }
         set { self[SwipeEdgeKey.self] = newValue }
     }
 }
 
-extension View {
-    /// Sets the swipe edge for the view.
-    /// - Parameter edge: The `HorizontalEdge` to use for swipe actions.
-    /// - Returns: A view with the specified swipe edge set in the environment.
-    public func swipeEdge(_ edge: HorizontalEdge) -> some View {
+// MARK: - Public API
+
+public extension View {
+    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
+    func swipeEdge(_ edge: HorizontalEdge) -> some View {
         self.environment(\.swipeEdge, edge)
     }
 }
+

@@ -4,13 +4,30 @@
 //
 //  Created by Sxnnyside Project on 21/01/25.
 //
-
+//  This file provides a set of predefined gradients as static properties on `ShapeStyle`
+//  for use throughout SxnnyUI. These gradients are designed for consistent, accessible,
+//  and visually appealing backgrounds or foregrounds in SwiftUI. Each gradient is
+//  suitable for common UI components such as buttons, text, and surfaces.
+//
+//  Usage Example:
+//    .background(.buttonGradient)
+//    .foregroundStyle(.blueTextGradient)
+//
 
 import SwiftUI
 
-extension ShapeStyle where Self == LinearGradient {
-    public static var buttonGradient: LinearGradient {
-        return LinearGradient(
+// MARK: - Predefined Gradients for Common UI Elements
+
+/// Commonly used gradients for UI components in SxnnyUI.
+/// Provides consistent background and foreground styles for buttons, text, and surfaces.
+@MainActor
+public extension ShapeStyle where Self == LinearGradient {
+
+    // MARK: - Button Gradients
+
+    /// A subtle light vertical gradient for button backgrounds, from light gray to off-white.
+    static var buttonGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color(red: 0.9, green: 0.9, blue: 0.9),
                 Color(red: 1.0, green: 1.0, blue: 0.95)
@@ -20,8 +37,9 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
-    public static var selectedButtonGradient: LinearGradient {
-        return LinearGradient(
+    /// A green-tinted vertical gradient for emphasizing selected button states.
+    static var selectedButtonGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color.green.opacity(0.2),
                 Color.green.opacity(0.6)
@@ -30,9 +48,12 @@ extension ShapeStyle where Self == LinearGradient {
             endPoint: .bottom
         )
     }
-    
-    public static var blueTextGradient: LinearGradient {
-        return LinearGradient(
+
+    // MARK: - Text Gradients
+
+    /// A blue diagonal gradient for text, from accent color to a custom blue-green.
+    static var blueTextGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color.accentColor,
                 Color(hex: "#88D9D0")
@@ -42,8 +63,9 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
-    public static var greenTextGradient: LinearGradient {
-        return LinearGradient(
+    /// A green diagonal gradient for text, from standard green to a lighter green.
+    static var greenTextGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color.green,
                 Color.green.opacity(0.6)
@@ -53,8 +75,9 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
-    public static var blackTextGradient: LinearGradient {
-        return LinearGradient(
+    /// A diagonal gradient for text, from black to gray.
+    static var blackTextGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color.black,
                 Color.gray
@@ -64,8 +87,9 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
-    public static var invertblackTextGradient: LinearGradient {
-        return LinearGradient(
+    /// A mirrored version of `blackTextGradient`, with the gradient reversed horizontally.
+    static var invertblackTextGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color.black,
                 Color.gray
@@ -75,8 +99,9 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
-    public static var whiteTextGradient: LinearGradient {
-        return LinearGradient(
+    /// A diagonal gradient for text, from white to gray.
+    static var whiteTextGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color.white,
                 Color.gray
@@ -86,8 +111,9 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
-    public static var invertwhiteTextGradient: LinearGradient {
-        return LinearGradient(
+    /// A mirrored version of `whiteTextGradient`, with the gradient reversed horizontally.
+    static var invertwhiteTextGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color.white,
                 Color.gray
@@ -97,8 +123,9 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
-    public static var invertpinkTextGradient: LinearGradient {
-        return LinearGradient(
+    /// An inverted diagonal gradient for text, from red toward pink.
+    static var invertpinkTextGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color.red.opacity(0.8),
                 Color.pink
@@ -108,8 +135,11 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
-    public static var bluebackgroundGradient: LinearGradient {
-        return LinearGradient(
+    // MARK: - Background Gradients
+
+    /// A soft blue vertical background gradient, fading to clear.
+    static var bluebackgroundGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color(hex: "#BDEEFB").opacity(0.8),
                 Color.clear
@@ -119,9 +149,12 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
+    /// An indigo vertical background gradient, fading to clear.
+    ///
+    /// - Availability: macOS 12.0, iOS 15.0, and later.
     @available(macOS 12.0, iOS 15.0, *)
-    public static var indigobackgroundGradient: LinearGradient {
-        return LinearGradient(
+    static var indigobackgroundGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color.indigo.opacity(0.8),
                 Color.clear
@@ -131,8 +164,9 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
-    public static var pinkbackgroundGradient: LinearGradient {
-        return LinearGradient(
+    /// A pink vertical background gradient, fading to clear.
+    static var pinkbackgroundGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color.pink.opacity(0.8),
                 Color.clear
@@ -142,8 +176,9 @@ extension ShapeStyle where Self == LinearGradient {
         )
     }
     
-    public static var graybackgroundGradient: LinearGradient {
-        return LinearGradient(
+    /// A light gray vertical background gradient, fading to clear.
+    static var graybackgroundGradient: LinearGradient {
+        LinearGradient(
             gradient: Gradient(colors: [
                 Color(hex: "#F0F0F0").opacity(0.8),
                 Color.clear

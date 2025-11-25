@@ -4,102 +4,148 @@
 //
 //  Created by Sxnnyside Project on 15/01/25.
 //
+//  This file defines a stylable SwiftUI view for displaying text or custom content
+//  with customizable background, corner radius, shadow, and padding. 
+//  APIs are documented and guarded for cross-platform, Swift package compatibility.
+//
 
 import SwiftUI
 
-/// A customizable view that displays content with a styled background, corner radius, shadow, and padding.
-/// This view is flexible and can display either a `Text` or custom content.
-@available(iOS 13.0, *)
+/// A customizable SwiftUI view for styled text or content with background, corner, shadow, and padding.
+///
+/// Use `FocusText` to display a `Text` or any custom view with common styling options. 
+/// All styles are builder-chainable for succinct configuration.
+///
+/// Example usage:
+/// ```swift
+/// FocusText("Focus!")
+///     .backgroundColor(.accentColor)
+///     .foregroundColor(.white)
+///     .cornerRadius(10)
+///     .shadowColor(.gray)
+///     .shadowRadius(5)
+///     .padding(8)
+/// ```
+///
+/// - Important: Uses `.foregroundStyle` if available (macOS 12+/iOS 15+); falls back to `.foregroundColor` on earlier systems.
+/// - Note: All style modifiers return a new `FocusText`, allowing chained configuration.
+///
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+@MainActor
 public struct FocusText<Content: View>: View {
-    /// The content of the view, which can be a `Text` or any custom view.
+    // MARK: - Properties
+
+    /// The content to display (typically `Text` or custom view).
     let content: Content
-    /// The background color of the view.
+
+    /// The background color.
     var backgroundColor: Color = .accentColor
-    /// The foreground color of the view.
+
+    /// The foreground (text/content) color.
     var foregroundColor: Color = .white
-    /// The corner radius of the view.
+
+    /// The corner radius.
     var cornerRadius: CGFloat = 10
-    /// The shadow color of the view.
+
+    /// The shadow color.
     var shadowColor: Color = .gray
-    /// The shadow radius of the view.
+
+    /// The shadow radius.
     var shadowRadius: CGFloat = 5
-    /// The padding around the content.
+
+    /// The content padding.
     var padding: CGFloat = 8
 
-    /// Initializes a `FocusText` with a `Text` content.
-    /// - Parameter text: The text to display in the view.
+    // MARK: - Initialization
+
+    /// Creates a `FocusText` view with a string.
+    ///
+    /// - Parameter text: The text to display.
     public init(_ text: String) where Content == Text {
         self.content = Text(text)
     }
-    
-    /// Initializes a `FocusText` with custom content.
-    /// - Parameter content: A closure that provides the custom content for the view.
+
+    /// Creates a `FocusText` view with custom content.
+    ///
+    /// - Parameter content: A closure providing the custom content.
     public init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
 
-    /// The body of the `FocusText` view.
-    /// Displays the content with the specified styles applied.
+    // MARK: - View
+
+    /// The content and styling for this view.
     public var body: some View {
-        content
-            .padding(padding)
-            .foregroundStyle(foregroundColor)
-            .background(backgroundColor)
-            .cornerRadius(cornerRadius)
-            .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: 5)
+        Group {
+            if #available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *) {
+                content
+                    .padding(padding)
+                    .foregroundStyle(foregroundColor)
+            } else {
+                content
+                    .padding(padding)
+                    .foregroundColor(foregroundColor)
+            }
+        }
+        .background(backgroundColor)
+        .cornerRadius(cornerRadius)
+        .shadow(color: shadowColor, radius: shadowRadius, x: 0, y: 5)
     }
 }
 
-extension FocusText {
-    /// Sets the background color of the `FocusText`.
-    /// - Parameter color: The color to use as the background.
-    /// - Returns: A new `FocusText` with the updated background color.
-    public func backgroundColor(_ color: Color) -> FocusText {
+// MARK: - Modifiers
+
+@available(macOS 11.0, iOS 14.0, tvOS 14.0, watchOS 7.0, *)
+public extension FocusText {
+    /// Sets the background color.
+    /// - Parameter color: The background color.
+    /// - Returns: A new `FocusText` with this background.
+    func backgroundColor(_ color: Color) -> FocusText {
         var copy = self
         copy.backgroundColor = color
         return copy
     }
-    
-    /// Sets the foreground color of the `FocusText`.
-    /// - Parameter color: The color to use for the text.
-    /// - Returns: A new `FocusText` with the updated foreground color.
-    public func foregroundColor(_ color: Color) -> FocusText {
+
+    /// Sets the foreground (text/content) color.
+    /// - Parameter color: The foreground color.
+    /// - Returns: A new `FocusText` with this color.
+    func foregroundColor(_ color: Color) -> FocusText {
         var copy = self
         copy.foregroundColor = color
         return copy
     }
 
-    /// Sets the corner radius of the `FocusText`.
-    /// - Parameter radius: The corner radius to apply.
-    /// - Returns: A new `FocusText` with the updated corner radius.
-    public func cornerRadius(_ radius: CGFloat) -> FocusText {
+    /// Sets the corner radius.
+    /// - Parameter radius: The corner radius.
+    /// - Returns: A new `FocusText` with this radius.
+    func cornerRadius(_ radius: CGFloat) -> FocusText {
         var copy = self
         copy.cornerRadius = radius
         return copy
     }
 
-    /// Sets the shadow color of the `FocusText`.
-    /// - Parameter color: The color to use for the shadow.
-    /// - Returns: A new `FocusText` with the updated shadow color.
-    public func shadowColor(_ color: Color) -> FocusText {
+    /// Sets the shadow color.
+    /// - Parameter color: The shadow color.
+    /// - Returns: A new `FocusText` with this shadow color.
+    func shadowColor(_ color: Color) -> FocusText {
         var copy = self
         copy.shadowColor = color
         return copy
     }
 
-    /// Sets the shadow radius of the `FocusText`.
-    /// - Parameter radius: The radius of the shadow.
-    /// - Returns: A new `FocusText` with the updated shadow radius.
-    public func shadowRadius(_ radius: CGFloat) -> FocusText {
+    /// Sets the shadow radius.
+    /// - Parameter radius: The shadow radius.
+    /// - Returns: A new `FocusText` with this shadow radius.
+    func shadowRadius(_ radius: CGFloat) -> FocusText {
         var copy = self
         copy.shadowRadius = radius
         return copy
     }
 
-    /// Sets the padding around the content of the `FocusText`.
-    /// - Parameter value: The padding value to apply.
-    /// - Returns: A new `FocusText` with the updated padding.
-    public func padding(_ value: CGFloat) -> FocusText {
+    /// Sets the content padding.
+    /// - Parameter value: The padding value.
+    /// - Returns: A new `FocusText` with this padding.
+    func padding(_ value: CGFloat) -> FocusText {
         var copy = self
         copy.padding = value
         return copy

@@ -87,11 +87,7 @@ public extension Color {
     func darker(by percentage: Double = 0.3) -> Color {
         adjustBrightness(by: -abs(percentage))
     }
-}
 
-// MARK: - Private Helpers
-
-private extension Color {
     /// Adjusts brightness up or down by the given percentage.
     ///
     /// Uses platform color extraction when available. On platforms without UIKit/AppKit extraction,
@@ -117,25 +113,28 @@ private extension Color {
             opacity: Double(a)
         )
         #elseif canImport(AppKit)
-        // AppKit-backed extraction (macOS without UIKit)
-        let nsColor = NSColor(self)
-        guard let rgbColor = nsColor.usingColorSpace(.deviceRGB) else { return self }
+        if #available(macOS 11.0, *) {
+            let nsColor = NSColor(self)
+            guard let rgbColor = nsColor.usingColorSpace(.deviceRGB) else { return self }
 
-        let r = rgbColor.redComponent
-        let g = rgbColor.greenComponent
-        let b = rgbColor.blueComponent
-        let a = rgbColor.alphaComponent
+            let r = rgbColor.redComponent
+            let g = rgbColor.greenComponent
+            let b = rgbColor.blueComponent
+            let a = rgbColor.alphaComponent
 
-        let clamp: (CGFloat) -> CGFloat = { value in
-            max(min(value + CGFloat(percentage), 1.0), 0.0)
+            let clamp: (CGFloat) -> CGFloat = { value in
+                max(min(value + CGFloat(percentage), 1.0), 0.0)
+            }
+
+            return Color(
+                red: Double(clamp(r)),
+                green: Double(clamp(g)),
+                blue: Double(clamp(b)),
+                opacity: Double(a)
+            )
+        } else {
+            return self
         }
-
-        return Color(
-            red: Double(clamp(r)),
-            green: Double(clamp(g)),
-            blue: Double(clamp(b)),
-            opacity: Double(a)
-        )
         #else
         // Fallback for platforms without UIKit/AppKit color extraction
         return self

@@ -79,7 +79,15 @@ private struct HideKeyboardModifier: ViewModifier {
 @MainActor
 private struct KeyboardVisibilityView: View {
     let onChange: @Sendable (Bool) -> Void
-    var body: some View { Color.clear.accessibilityHidden(true) }
+    var body: some View {
+        Group {
+            if #available(macOS 11.0, *) {
+                Color.clear.accessibilityHidden(true)
+            } else {
+                Color.clear
+            }
+        }
+    }
 }
 
 #endif
@@ -121,3 +129,4 @@ public extension View {
         #endif
     }
 }
+

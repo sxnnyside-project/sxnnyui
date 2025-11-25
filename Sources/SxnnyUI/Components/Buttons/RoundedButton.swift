@@ -4,38 +4,44 @@
 //
 //  Created by Sxnnyside Project on 21/01/25.
 //
-
+//  A customizable rounded button for SwiftUI, with support for dynamic labels, colors,
+//  and disabled states. Styled for clarity, maintainability, and best practices as a Swift package component.
+//
+//  Example usage:
+//  ```swift
+//  RoundedButton(text: "Submit") { print("Tapped!") }
+//      .backgroundColor(.green)
+//  ```
+//
 
 import SwiftUI
 
-//
-//  RoundedButton.swift
-//  SxnnyUI
-//
-//  Created by Sxnnyside Project on 21/01/25.
-//
+// MARK: - RoundedButton
 
-import SwiftUI
-
-/// A customizable rounded button that supports dynamic labels, colors, and disabled states.
+/// A customizable rounded button supporting dynamic labels, background color, and disabled state.
+///
+/// - Supports custom label views and a convenience text initializer.
+/// - The background color can be set via the environment using `.backgroundColor(_:)`.
+/// - The disabled state is resolved dynamically by a closure.
+///
+/// Availability:
+/// - macOS 10.15+, iOS 13.0+, tvOS 13.0+, watchOS 6.0+ (all required SwiftUI APIs are available)
 public struct RoundedButton<Label: View>: View {
-    /// The label of the button, which can be any SwiftUI `View`.
+    /// The content of the button, as a custom SwiftUI view.
     private let label: Label
-    
     /// The action to perform when the button is tapped.
     private let action: () -> Void
-    
-    /// A closure that determines whether the button is disabled.
+    /// Closure determining whether the button is disabled.
     private let isDisabled: () -> Bool
-    
-    /// The background color of the button, customizable via the environment.
+    /// The background color, injected via the SwiftUI environment.
     @Environment(\.roundedButtonBackgroundColor) private var backgroundColor
 
     /// Creates a `RoundedButton` with a custom label.
+    ///
     /// - Parameters:
     ///   - action: The action to perform when the button is tapped.
-    ///   - disabled: A closure that determines whether the button is disabled. Defaults to `false`.
-    ///   - label: A view builder that provides the label for the button.
+    ///   - disabled: Closure that determines whether the button is disabled. Defaults to `false`.
+    ///   - label: View builder supplying the button's label.
     public init(
         action: @escaping () -> Void,
         disabled: @escaping () -> Bool = { false },
@@ -47,10 +53,11 @@ public struct RoundedButton<Label: View>: View {
     }
 
     /// Creates a `RoundedButton` with a text label.
+    ///
     /// - Parameters:
-    ///   - text: The text to display as the button's label.
+    ///   - text: The label text.
     ///   - action: The action to perform when the button is tapped.
-    ///   - disabled: A closure that determines whether the button is disabled. Defaults to `false`.
+    ///   - disabled: Closure that determines whether the button is disabled. Defaults to `false`.
     public init(
         text: String,
         action: @escaping () -> Void,
@@ -61,7 +68,7 @@ public struct RoundedButton<Label: View>: View {
         self.isDisabled = disabled
     }
 
-    /// The content and behavior of the button.
+    /// The body of the rounded button.
     public var body: some View {
         Button(action: action) {
             label
@@ -77,12 +84,14 @@ public struct RoundedButton<Label: View>: View {
     }
 }
 
-/// A private key for storing the background color of the `RoundedButton` in the environment.
+// MARK: - Environment Support
+
+/// The environment key for customizing the background color of `RoundedButton`.
 private struct RoundedButtonBackgroundColorKey: EnvironmentKey {
     static let defaultValue: Color = .accentColor
 }
 
-extension EnvironmentValues {
+public extension EnvironmentValues {
     /// The background color for `RoundedButton`. Defaults to `.accentColor`.
     var roundedButtonBackgroundColor: Color {
         get { self[RoundedButtonBackgroundColorKey.self] }
@@ -90,11 +99,12 @@ extension EnvironmentValues {
     }
 }
 
-extension View {
-    /// Sets the background color for `RoundedButton` instances within this view.
-    /// - Parameter color: The color to use as the background for `RoundedButton`.
-    /// - Returns: A view with the modified environment value.
-    public func backgroundColor(_ color: Color) -> some View {
+public extension View {
+    /// Sets the background color for `RoundedButton` instances within this view hierarchy.
+    ///
+    /// - Parameter color: The color to use for the button’s background.
+    /// - Returns: A view that applies the color to the `RoundedButton` background.
+    func backgroundColor(_ color: Color) -> some View {
         environment(\.roundedButtonBackgroundColor, color)
     }
 }
