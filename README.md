@@ -1,60 +1,85 @@
-# SxnnyUI
+<p align="center">
+  <img src="SxnnyUI.png" alt="SxnnyUI" width="300"/>
+</p>
 
-![SxnnyUI Logo](SxnnyUI.png)
+<h1 align="center">SxnnyUI</h1>
+<p align="center"><em>A lightweight, themeable SwiftUI component library for Apple platforms.</em></p>
 
-[![Swift](https://img.shields.io/badge/swift-5.8%2B-orange.svg)](https://swift.org)
-[![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS-blue.svg)](#requirements)
-[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
+[![Swift 6.0](https://img.shields.io/badge/Swift-6.0-orange.svg)](https://swift.org)
+[![Platforms](https://img.shields.io/badge/Platforms-iOS%2015%20%7C%20macOS%2012%20%7C%20tvOS%2015%20%7C%20watchOS%208%20%7C%20visionOS%201-blue.svg)](#platform-support)
+[![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
 
-SxnnyUI is a curated collection of reusable, themeable SwiftUI components and layout helpers designed to accelerate UI development across Apple platforms.
+## Overview
 
----
+SxnnyUI provides a curated collection of reusable SwiftUI components, layout helpers, and utilities designed to accelerate UI development across Apple platforms.
 
-## Quick Overview
+### Design Principles
 
-- **Purpose:** Provide well-documented, lightweight SwiftUI building blocks (buttons, labels, badges, layout containers, utilities).
-- **Design Goals:** Ease of use, accessibility, theming, and cross-platform compatibility.
-- **Integration:** Distributed as a Swift Package (SPM) and compatible with Xcode package workflows.
+- **Composability** — Small, focused components that combine well
+- **Consistency** — Unified theming via `SxnnyTheme`
+- **Compatibility** — Cross-platform support with graceful degradation
+- **Clarity** — Well-documented APIs following Swift conventions
 
----
+## Requirements
+
+| Platform  | Minimum Version |
+|-----------|-----------------|
+| iOS       | 15.0            |
+| macOS     | 12.0            |
+| tvOS      | 15.0            |
+| watchOS   | 8.0             |
+| visionOS  | 1.0             |
+
+- Swift 6.0+
+- Xcode 16.0+
 
 ## Installation
 
-Install via Swift Package Manager (recommended).
+### Swift Package Manager
 
-Add the package dependency to your `Package.swift` or use Xcode’s **File > Add Packages…** with the repository URL:
+Add SxnnyUI to your project using Xcode:
+
+1. Go to **File → Add Package Dependencies...**
+2. Enter the repository URL:
+   ```
+   https://github.com/Sxnnyside-Project/SxnnyUI.git
+   ```
+3. Select your version requirements
+
+Or add it directly to your `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/Sxnnyside-Project/SxnnyUI.git", from: "1.0.1c")
+dependencies: [
+    .package(url: "https://github.com/Sxnnyside-Project/SxnnyUI.git", from: "1.0.0")
+]
 ```
 
-Or add the package in Xcode by pointing to the repository and choosing an appropriate version or branch.
+Then add `SxnnyUI` to your target's dependencies:
 
----
+```swift
+.target(
+    name: "YourTarget",
+    dependencies: ["SxnnyUI"]
+)
+```
 
-## Example
+## Usage
 
-This example demonstrates a simple SwiftUI view using core SxnnyUI components.
+### Quick Start
 
 ```swift
 import SwiftUI
 import SxnnyUI
 
-struct ExampleView: View {
+struct ContentView: View {
     var body: some View {
         SxnnyScaffold {
             SxnnyYStack(spacing: 16) {
-                HStack {
-                    Image(systemName: "bell")
-                        .badge(count: 3)
-                    Spacer()
-                    FocusText("Welcome to SxnnyUI")
-                        .backgroundColor(.accentColor)
-                        .foregroundColor(.white)
-                }
-
+                FocusText("Welcome to SxnnyUI")
+                    .backgroundColor(.accentColor)
+                
                 RoundedButton(text: "Get Started") {
-                    // Action
+                    // Handle tap
                 }
                 .backgroundColor(.blue)
             }
@@ -64,79 +89,127 @@ struct ExampleView: View {
 }
 ```
 
-Notes:
-- `Badge`, `FocusText`, and `RoundedButton` are examples of components provided in this package. Check the `Sources/SxnnyUI/Components` folder for additional views and usage notes.
+## Public API
 
----
+### Components
 
-## Project Structure (high-level)
+#### Buttons
 
-- `Package.swift` : Swift package manifest
-- `Sources/SxnnyUI/` : Library source code
-  - `Components/` : UI components (Buttons, Labels, TextFields, etc.)
-  - `Layout/` : Layout helpers and containers (stacks, grids, scaffold)
-  - `Extensions/` : Small language and platform helpers
-  - `Modifiers/` : View modifiers used across components
-  - `Theme/` : Theming utilities
-  - `Utilities/` : Logger, formatters, and small utilities
-- `Tests/SxnnyUITests/` : Unit/UI tests
-- `README.md`, `LICENSE` : Repo metadata
+| Component           | Description                                              |
+|---------------------|----------------------------------------------------------|
+| `RoundedButton`     | Customizable rounded button with environment theming     |
+| `IconButton`        | Button with icon and label, supporting gradients         |
+| `TriggerButton`     | Toggle button with primary/secondary actions             |
+| `ValidationButton`  | Button that validates a condition before executing       |
 
-This is a top-level, non-exhaustive view — explore each folder for detailed APIs and documentation comments.
+#### Labels & Text
 
----
+| Component                  | Description                                    |
+|----------------------------|------------------------------------------------|
+| `FocusText`                | Styled text with background, shadow, and radius|
+| `Badge`                    | Notification badge overlay                     |
+| `ValidationLabel`          | Swipe-to-validate label                        |
+| `CenterAlignedLabelStyle`  | Accessibility-aware label style                |
 
-## Requirements
+#### Text Fields
 
-- Swift 5.8+
-- Xcode 15+ recommended
-- Supported platforms: iOS, macOS, tvOS, watchOS (see package APIs for availability annotations)
+| Component          | Description                                |
+|--------------------|--------------------------------------------|
+| `FocusTextField`   | Text field with `@FocusState` binding      |
+| `LabeledTextField` | Labeled numeric text field                 |
+| `TriggeredTextField`| UIKit-backed text field wrapper           |
 
----
+### Layout
 
-## Usage & Customization
+| Component             | Description                                        |
+|-----------------------|----------------------------------------------------|
+| `SxnnyScaffold`       | Screen structure with top bar, bottom bar, and FAB |
+| `SxnnyYStack`         | Vertical stack with default spacing                |
+| `SxnnyXStack`         | Horizontal stack with default spacing              |
+| `SxnnyLazyYStack`     | Lazy vertical stack for large content              |
+| `SxnnyLazyXStack`     | Lazy horizontal stack for large content            |
+| `SxnnyScrollView`     | Scrollable container with axis configuration       |
+| `SxnnyContainer`      | Padded, rounded, shadowed container                |
+| `SxnnyOverlay`        | Modal overlay with dismissible background          |
+| `SxnnySplitView`      | Resizable split view with draggable divider        |
+| `SxnnyResponsiveView` | Adaptive layout for small/medium/large widths      |
+| `SxnnyGrid`           | Grid layout                                        |
+| `SxnnyLazyXGrid`      | Lazy horizontal grid                               |
+| `SxnnyLazyYGrid`      | Lazy vertical grid                                 |
+| `SxnnyForm`           | Form wrapper                                       |
+| `SxnnySection`        | Section wrapper                                    |
 
-- Theme components via environment values and the `Theme` utilities.
-- Chain view modifiers on `FocusText`, `RoundedButton`, and others for concise styling.
-- Use layout helpers (e.g., `SxnnyScaffold`, `SxnnyYStack`) to build responsive app UIs quickly.
+### Utilities
 
----
+| Utility           | Description                                |
+|-------------------|--------------------------------------------|
+| `SxnnyTheme`      | Centralized design tokens                  |
+| `AlertManager`    | Observable alert state management          |
+| `KeychainManager` | Secure keychain storage helpers            |
+| `Logger`          | Throttled logging utility                  |
 
-## Development
+### Extensions
 
-- Run tests:
+The library extends standard SwiftUI and Foundation types:
 
-```bash
-swift test
+- **`View`** — Conditional modifiers, card styling, visibility helpers
+- **`Color`** — Hex initialization, brightness adjustment, CMYK support
+- **`Binding`** — Clamping, nil replacement, type conversion
+- **`Collection`** — Safe indexing, chunking, grouping
+- **`Date`** — Formatting, calendar checks
+- **`StringProtocol`** — Case conversion, validation
+
+### Formatters
+
+| Formatter       | Description              |
+|-----------------|--------------------------|
+| `DateFormat`    | Date formatting helpers  |
+| `TimeFormat`    | Time formatting helpers  |
+| `FloatFormatter`| Number formatting        |
+| `PhoneFormat`   | Phone number formatting  |
+
+## Theming
+
+Customize the visual appearance using `SxnnyTheme`:
+
+```swift
+// Access theme values
+let spacing = SxnnyTheme.defaultSpacing
+let background = SxnnyTheme.background
+let accent = SxnnyTheme.accentColor
 ```
 
-- Format with `swift-format` or `swift-format` rules used by the project (if configured).
+Component-specific styling uses environment values:
 
----
+```swift
+RoundedButton(text: "Submit") { }
+    .backgroundColor(.green)
+```
 
+## Documentation
 
-## Contributing & Community
+API documentation is available via DocC. Generate documentation locally:
 
-- Please read `CONTRIBUTING.md` for guidelines on reporting issues, running tests, and submitting pull requests.
-- This project follows a community `CODE_OF_CONDUCT.md` — please review it before contributing.
-- To report security issues privately, see `SECURITY.md` (do not post sensitive details publicly).
-- Issue and pull request templates are provided in `.github/` to help triage and speed up reviews.
+```bash
+swift package generate-documentation
+```
 
----
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Security
+
+To report security vulnerabilities, see [SECURITY.md](SECURITY.md).
+
+## Code of Conduct
+
+This project follows the Contributor Covenant. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## License
 
-SxnnyUI is released under the MIT License. See `LICENSE` for details.
+SxnnyUI is released under the MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
-## Contact
-
-- Maintainer: Sxnnyside Project
-- Repository: https://github.com/Sxnnyside-Project/SxnnyUI
-
-If you find this package useful, please consider starring the repository.
-
----
-
-*Last updated: November 2025*
+Maintained by [Sxnnyside Project](https://github.com/Sxnnyside-Project)

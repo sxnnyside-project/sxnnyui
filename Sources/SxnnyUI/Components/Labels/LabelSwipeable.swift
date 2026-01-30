@@ -81,17 +81,11 @@ public struct LabelSwipeable<Content: View>: View {
         environment.swipeEdge
     }
 
+    @available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *)
     @ViewBuilder
     private func SwipeableIcon() -> some View {
-        if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
-            Image(systemName: "plus.circle.fill")
-                .tint(.green)
-        } else if #available(iOS 14.0, macOS 11.0, tvOS 14.0, watchOS 7.0, *) {
-            Image(systemName: "plus.circle.fill")
-                .foregroundColor(.green)
-        } else {
-            EmptyView()
-        }
+        Image(systemName: "plus.circle.fill")
+            .tint(.green)
     }
 }
 

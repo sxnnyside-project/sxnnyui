@@ -41,13 +41,14 @@ public extension Binding where Value == Double {
 
 // MARK: - Clamped Binding
 
-public extension Binding where Value: Comparable {
+public extension Binding where Value: Comparable & Sendable {
     /// Returns a new binding that clamps incoming values to the specified closed range.
     ///
     /// Assignments outside the range are clamped to the nearest bound.
     ///
     /// - Parameter limits: The allowed closed range for the value.
     /// - Returns: A binding that enforces the provided range on write.
+    @MainActor
     func clamped(to limits: ClosedRange<Value>) -> Binding<Value> {
         Binding<Value>(
             get: { self.wrappedValue },
@@ -66,7 +67,8 @@ public extension Binding {
     ///
     /// - Parameter defaultValue: The value to use when the optional is `nil`.
     /// - Returns: A `Binding<T>` that projects a non-optional view over an optional binding.
-    func replacingNil<T>(with defaultValue: T) -> Binding<T>
+    @MainActor
+    func replacingNil<T: Sendable>(with defaultValue: T) -> Binding<T>
     where Value == Optional<T> {
         Binding<T>(
             get: { self.wrappedValue ?? defaultValue },
@@ -77,12 +79,13 @@ public extension Binding {
 
 // MARK: - Boolean Toggle from Comparable
 
-public extension Binding where Value: Comparable {
+public extension Binding where Value: Comparable & Sendable {
     /// Returns a `Binding<Bool>` that is `true` when the wrapped value equals the target.
     ///
     /// - Parameter target: The value to compare against.
     /// - Returns: A boolean binding reflecting equality. Writing `true` sets the wrapped value to `target`;
     ///   writing `false` is a no-op.
+    @MainActor
     func isEqual(to target: Value) -> Binding<Bool> {
         Binding<Bool>(
             get: { self.wrappedValue == target },
