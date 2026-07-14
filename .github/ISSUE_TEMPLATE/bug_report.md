@@ -1,27 +1,28 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: '[BUG] '
+name: Bug Report
+about: Something isn't working as expected
+title: "fix: "
 labels: bug
-assignees: ''
+assignees: ""
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## What happened?
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '...'
-3. See error
+<!-- What did you expect? What actually happened? -->
 
-**Expected behavior**
-What you expected to happen.
+## Steps to reproduce
 
-**Environment (please complete the following information):**
-- SxnnyUI version:
+1.
+2.
+3.
+
+## Environment
+
+- OS:
+- SxnnyErgo version:
 - Swift version:
-- Platform (iOS/macOS/tvOS/watchOS) and OS version:
+- Platform (iOS/macOS/tvOS/watchOS/visionOS):
 
-**Additional context**
-Add any other context about the problem here (logs, screenshots, minimal code sample).
+## Additional context
+
+<!-- Logs, screenshots, or a minimal code sample. Delete if not applicable. -->

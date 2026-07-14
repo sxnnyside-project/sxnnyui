@@ -1,0 +1,24 @@
+#!/bin/sh
+# Enforces the Conventional Commits format documented in CONTRIBUTING.md.
+# Installed via `make install-hooks` (sets core.hooksPath to .githooks).
+
+commit_msg_file="$1"
+subject_line=$(head -n1 "$commit_msg_file")
+
+# Allow merge commits and fixups to pass through untouched.
+case "$subject_line" in
+    "Merge "*|"Revert "*|"fixup!"*|"squash!"*)
+        exit 0
+        ;;
+esac
+
+pattern='^(feat|fix|docs|style|refactor|perf|test|chore)(\([a-zA-Z0-9_-]+\))?: .+'
+
+if ! echo "$subject_line" | grep -qE "$pattern"; then
+    echo "error: commit message does not follow Conventional Commits." >&2
+    echo "  expected: <type>(optional-scope): <subject>" >&2
+    echo "  types: feat, fix, docs, style, refactor, perf, test, chore" >&2
+    echo "  got:      \"$subject_line\"" >&2
+    echo "  see CONTRIBUTING.md > Commit Message Guidelines" >&2
+    exit 1
+fi

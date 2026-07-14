@@ -1,19 +1,24 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: '[FEATURE] '
+name: Feature Request
+about: A proposal for new functionality or an improvement
+title: "feat: "
 labels: enhancement
-assignees: ''
+assignees: ""
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is.
+## What are you proposing?
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+<!-- Describe the feature. One paragraph is enough to start. -->
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+## Why does this belong in SxnnyErgo?
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+<!-- How does it fit the project's scope and philosophy — see Documentation/PRODUCT_DOMAINS.md?
+     If it's a rough idea that needs more thought, say so — that's fine. -->
+
+## Possible implementation
+
+<!-- Optional. If you have a direction in mind, sketch it here. Delete if you don't. -->
+
+## Alternatives considered
+
+<!-- Optional. Other approaches you ruled out and why. Delete if not applicable. -->

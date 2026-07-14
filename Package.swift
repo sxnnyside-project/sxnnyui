@@ -4,31 +4,27 @@
 import PackageDescription
 
 let package = Package(
-    name: "SxnnyUI",
+    name: "SxnnyErgo",
     platforms: [
         .iOS(.v15),
         .macOS(.v12),
         .tvOS(.v15),
         .watchOS(.v8),
-        .visionOS(.v1)
+        .visionOS(.v1),
     ],
     products: [
         .library(
-            name: "SxnnyUI",
-            targets: ["SxnnyUI"]
-        ),
+            name: "SxnnyErgo",
+            targets: ["SxnnyErgo"]
+        )
     ],
     targets: [
         .target(
-            name: "SxnnyUI",
-            dependencies: [],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency")
-            ]
+            name: "SxnnyErgo"
         ),
         .testTarget(
-            name: "SxnnyUITests",
-            dependencies: ["SxnnyUI"]
+            name: "SxnnyErgoTests",
+            dependencies: ["SxnnyErgo"]
         ),
     ]
 )

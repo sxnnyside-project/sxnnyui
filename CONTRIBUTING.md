@@ -1,277 +1,132 @@
-# Contributing to SxnnyUI
+# Contributing to SxnnyErgo
 
-Thank you for your interest in contributing to SxnnyUI. This document provides guidelines and instructions for contributing to the project.
+Contributions are welcome — bugs, fixes, features, or documentation.
+This document covers how to work with the project as a contributor.
 
-## Getting Started
+---
 
-### Prerequisites
+## Before You Start
 
-- Xcode 15.0 or later
-- Swift 6.0 or later
-- macOS 13.0 or later for development
+- Search [existing issues](https://github.com/Sxnnyside-Project/SxnnyErgo/issues) before opening a new one.
+- For significant changes, open an issue first to discuss the direction before writing code.
+- Read the [Code of Conduct](CODE_OF_CONDUCT.md). It applies to all interactions in this project.
+- Read [Documentation/REPOSITORY_CANON.md](Documentation/REPOSITORY_CANON.md) — this repository is governed by a documented set of engineering and product rules, and every change is evaluated against it.
 
-### Supported Platforms
+---
 
-SxnnyUI supports the following platforms:
+## Development Setup
 
-- iOS 15.0+
-- macOS 12.0+
-- tvOS 15.0+
-- watchOS 8.0+
-- visionOS 1.0+
+Prerequisites: Xcode 16.0+, Swift 6.0+, macOS 13.0+.
 
-### Setting Up the Development Environment
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/SxnnyUI.git
-   cd SxnnyUI
-   ```
-
-2. Open the package in Xcode:
-   ```bash
-   open Package.swift
-   ```
-
-3. Build the project to verify your setup:
-   ```bash
-   swift build
-   ```
-
-4. Run tests:
-   ```bash
-   swift test
-   ```
-
-## Project Structure
-
-The project follows a standard Swift Package structure:
-
-- `Sources/SxnnyUI/` - Main library code
-  - `Components/` - Reusable UI components (buttons, labels, text fields)
-  - `Extensions/` - Swift and SwiftUI extensions
-  - `Layout/` - Layout containers and utilities
-  - `Manager/` - Service managers (alerts, keychain)
-  - `Modifiers/` - Custom view modifiers
-  - `Theme/` - Theming system
-  - `Utilities/` - Helper utilities and formatters
-- `Tests/SxnnyUITests/` - Unit and integration tests
-
-## Coding Standards
-
-### Swift API Design Guidelines
-
-Follow the [Swift API Design Guidelines](https://swift.org/documentation/api-design-guidelines/) for all code contributions.
-
-Key principles:
-
-- **Clarity at the point of use** is the most important goal
-- Use clear, descriptive names
-- Omit needless words
-- Name according to roles, not types
-- Compensate for weak type information
-- Strive for fluent usage
-
-### SwiftUI Conventions
-
-- Prefix custom components with `Sxnny` to avoid namespace collisions
-- Use view modifiers for styling and behavior
-- Keep views small and composable
-- Prefer `@State` and `@Binding` for local state management
-- Use `@Environment` for shared configuration
-
-### Code Style
-
-- Use 4 spaces for indentation
-- Maximum line length of 120 characters
-- Use Swift's modern concurrency features where appropriate
-- Mark types as `public`, `internal`, or `private` explicitly
-- Document public APIs with doc comments
-
-### Documentation
-
-All public APIs must include documentation comments:
-
-```swift
-/// A brief description of what the type or function does.
-///
-/// A more detailed explanation if needed, including usage examples.
-///
-/// - Parameters:
-///   - parameter1: Description of parameter1
-///   - parameter2: Description of parameter2
-/// - Returns: Description of the return value
-public func exampleFunction(parameter1: String, parameter2: Int) -> Bool {
-    // implementation
-}
-```
-
-## Commit Message Guidelines
-
-Write clear, concise commit messages following these conventions:
-
-### Format
-
-```
-<type>: <subject>
-
-<body>
-
-<footer>
-```
-
-### Types
-
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, missing semicolons, etc.)
-- `refactor`: Code refactoring without changing functionality
-- `perf`: Performance improvements
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks, dependency updates
-
-### Examples
-
-```
-feat: add SxnnyCard component with shadow support
-
-Implement a card component with customizable shadow, corner radius,
-and padding. Supports both light and dark mode.
-
-Closes #42
-```
-
-```
-fix: resolve layout issue in SxnnyGrid on iPad
-
-The grid was not properly calculating column widths on iPad in
-landscape orientation. Updated the layout logic to use available
-width correctly.
-```
-
-## Pull Request Process
-
-### Before Submitting
-
-1. Ensure your code builds without warnings
-2. Run all tests and verify they pass
-3. Update documentation for any API changes
-4. Add tests for new features or bug fixes
-5. Verify your changes work on all supported platforms where applicable
-
-### Submitting a Pull Request
-
-1. Fork the repository and create a new branch:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. Make your changes following the coding standards
-
-3. Commit your changes with clear commit messages
-
-4. Push to your fork:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-5. Open a pull request with:
-   - Clear title describing the change
-   - Detailed description of what changed and why
-   - Reference to any related issues
-   - Screenshots or examples for UI changes
-
-### Pull Request Title Format
-
-Use the same format as commit messages:
-
-```
-feat: add new component
-fix: resolve issue with existing component
-docs: update contributing guidelines
-```
-
-## Review Process
-
-### What to Expect
-
-- Maintainers will review your PR within 5 business days
-- You may be asked to make changes or provide clarification
-- Once approved, a maintainer will merge your PR
-- Your contribution will be included in the next release
-
-### Review Criteria
-
-Pull requests are evaluated on:
-
-- Code quality and adherence to Swift conventions
-- Test coverage and quality
-- Documentation completeness
-- API design and consistency with existing code
-- Performance implications
-- Cross-platform compatibility
-
-## Testing
-
-### Writing Tests
-
-- Write unit tests for new functionality
-- Update existing tests when modifying behavior
-- Use descriptive test names that explain what is being tested
-- Follow the Arrange-Act-Assert pattern
-
-Example:
-
-```swift
-func testButtonTriggerActionOnTap() {
-    // Arrange
-    var actionTriggered = false
-    let button = RoundedButton(title: "Test") {
-        actionTriggered = true
-    }
-    
-    // Act
-    button.action()
-    
-    // Assert
-    XCTAssertTrue(actionTriggered)
-}
-```
-
-### Running Tests
-
-Run all tests:
 ```bash
-swift test
+git clone https://github.com/Sxnnyside-Project/SxnnyErgo.git
+cd SxnnyErgo
+make build
+make test
+make install-hooks
 ```
 
-Run tests for a specific platform:
-```bash
-xcodebuild test -scheme SxnnyUI -destination 'platform=iOS Simulator,name=iPhone 15'
-```
+`make install-hooks` points git at the repository's tracked hooks (`.githooks/`) — commit-message and formatting checks that run locally before CI ever sees them.
 
-## Reporting Issues
+The [`Makefile`](Makefile) exposes the full standard command surface:
 
-When reporting issues, include:
+| Command | Does |
+|---|---|
+| `make build` | `swift build` |
+| `make test` | `swift test` |
+| `make format` | Rewrite sources with `swift-format` |
+| `make format-check` | Verify formatting without writing — what CI runs |
+| `make lint` | Style diagnostics without rewriting |
+| `make dead-code` | Periphery unused-declaration scan (`brew install periphery`) |
+| `make check` | `format-check` + `build` + `test` + `dead-code` |
+| `make clean` | Remove build artifacts |
+| `make docs` | Generate DocC documentation locally |
 
-- Clear description of the problem
+---
+
+## Reporting a Bug
+
+Open a [GitHub Issue](https://github.com/Sxnnyside-Project/SxnnyErgo/issues/new/choose) using the bug report template.
+
+Include:
+- What you expected to happen
+- What actually happened
 - Steps to reproduce
-- Expected behavior
-- Actual behavior
-- Platform and version information
-- Code samples or screenshots if applicable
+- Environment details (platform, OS version, Xcode/Swift version)
 
-Use the appropriate issue template for bug reports or feature requests.
+---
+
+## Proposing a Feature
+
+Open a [GitHub Issue](https://github.com/Sxnnyside-Project/SxnnyErgo/issues/new/choose) using the feature request template, or submit a PR directly if the change is small and self-contained.
+
+For larger features, an issue discussion first avoids wasted effort on both sides — check [Documentation/PRODUCT_DOMAINS.md](Documentation/PRODUCT_DOMAINS.md) first to confirm the proposal belongs in SxnnyErgo at all.
+
+---
+
+## Workflow
+
+1. Fork the repository and create a branch from `main`.
+2. Name your branch descriptively — `fix/grid-column-width`, `feat/adaptive-badge`.
+3. Make your changes, following [Documentation/API_DESIGN.md](Documentation/API_DESIGN.md), [Documentation/NAMING.md](Documentation/NAMING.md), and [Documentation/SWIFT_STANDARDS.md](Documentation/SWIFT_STANDARDS.md).
+4. Run `make check` before opening the PR.
+5. Open a pull request against `main` with a clear description of what changed and why.
+
+---
+
+## Pull Request Checklist
+
+Before submitting:
+
+- [ ] `make check` passes (formatting, build, tests, dead-code)
+- [ ] Changes are described in [CHANGELOG.md](CHANGELOG.md) under `[Unreleased]`
+- [ ] The PR description explains what changed and why
+- [ ] New or modified public symbols carry a complete DocC comment
+- [ ] New behavior is covered by tests
+
+---
+
+## Commit Style
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), enforced locally by the `commit-msg` hook once `make install-hooks` has been run. Every commit message must follow the format:
+
+```
+<type>: <description>
+
+[optional body]
+[optional footer]
+```
+
+Accepted types:
+
+| Type       | Use for                                          |
+|------------|---------------------------------------------------|
+| `feat`     | New functionality                                |
+| `fix`      | Bug fixes                                        |
+| `docs`     | Documentation only                               |
+| `style`    | Formatting, whitespace — no logic changes        |
+| `refactor` | Code restructure without behavior change         |
+| `test`     | Adding or updating tests                         |
+| `chore`    | Build process, tooling, dependencies             |
+| `perf`     | Performance improvements                         |
+
+Examples:
+
+```
+feat: add IconButton press-state animation
+fix: prevent BreakpointLayout crash on zero-width containers
+docs: correct installation steps for Xcode 16
+chore: add Periphery dead-code scan to CI
+```
+
+Commits that don't follow this format are rejected by the hook and flagged during review.
+
+---
 
 ## Questions
 
-If you have questions about contributing, feel free to:
+If something in the codebase is unclear, open an issue with the `question` label before assuming it's a bug.
 
-- Open a discussion on GitHub
-- Ask in an issue or pull request
-- Contact the maintainers at houjouzetaalpha@gmail.com
+---
 
-## License
-
-By contributing to SxnnyUI, you agree that your contributions will be licensed under the same license as the project.
+*SxnnyErgo is a Sxnnyside Project. Part of the [Sxnnyside Project](https://sxnnysideproject.com).*

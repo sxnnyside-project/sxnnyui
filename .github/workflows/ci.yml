@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    name: Format, Build & Test
+    runs-on: macos-15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -switch /Applications/Xcode_16.app/Contents/Developer
+
+      - name: Swift version
+        run: swift --version
+
+      - name: Install Periphery
+        run: brew install periphery
+
+      - name: Verify formatting
+        run: make format-check
+
+      - name: Build
+        run: make build
+
+      - name: Test
+        run: make test
+
+      - name: Dead-code scan
+        run: make dead-code

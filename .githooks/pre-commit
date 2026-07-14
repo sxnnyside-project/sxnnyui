@@ -1,0 +1,26 @@
+#!/bin/sh
+# Verifies formatting of staged Swift files before allowing a commit.
+# Installed via `make install-hooks` (sets core.hooksPath to .githooks).
+
+staged_swift_files=$(git diff --cached --name-only --diff-filter=ACM -- '*.swift')
+
+if [ -z "$staged_swift_files" ]; then
+    exit 0
+fi
+
+if ! command -v swift >/dev/null 2>&1; then
+    echo "warning: swift not found on PATH, skipping format check" >&2
+    exit 0
+fi
+
+failed=0
+for file in $staged_swift_files; do
+    if [ -f "$file" ]; then
+        swift format lint --strict "$file" || failed=1
+    fi
+done
+
+if [ "$failed" -ne 0 ]; then
+    echo "error: formatting issues found — run 'make format' and re-stage." >&2
+    exit 1
+fi

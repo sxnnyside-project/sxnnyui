@@ -1,0 +1,4 @@
+retain_public: true
+disable_redundant_public_analysis: true
+report_exclude:
+  - "Tests/**"
