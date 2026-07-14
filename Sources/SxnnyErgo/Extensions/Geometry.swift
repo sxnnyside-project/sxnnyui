@@ -58,7 +58,9 @@ extension View {
             }
         )
         .onPreferenceChange(SizePreferenceKey.self) { size in
-            action(size)
+            Task { @MainActor in
+                action(size)
+            }
         }
     }
 
@@ -92,7 +94,9 @@ extension View {
             }
         )
         .onPreferenceChange(FramePreferenceKey.self) { frame in
-            action(frame)
+            Task { @MainActor in
+                action(frame)
+            }
         }
     }
 }
